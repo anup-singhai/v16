@@ -97,9 +97,9 @@ v16 connect --token YOUR_TOKEN
 
 | Category | Features |
 |----------|----------|
-| **Desktop** | Screen capture, mouse/keyboard control, window management |
-| **Browser** | Navigate, fill forms, extract data, screenshots (coming soon) |
-| **Terminal** | Interactive shell sessions, command execution (coming soon) |
+| **Desktop** | ✅ Screen capture, mouse/keyboard control, window management |
+| **Browser** | ✅ Navigate, fill forms, extract data, screenshots |
+| **Terminal** | ✅ Interactive shell sessions, command execution, multi-session |
 | **Files** | Read, write, edit, search (grep), pattern match (glob) |
 | **Code** | Git operations, diff editing (enhanced tools coming soon) |
 | **Web** | Search (Brave/DuckDuckGo), fetch content |
@@ -108,12 +108,43 @@ v16 connect --token YOUR_TOKEN
 
 ### AI Features
 
+- **18 Tools**: Desktop, browser, terminal, files, web, hardware, and more
 - **14+ LLM Providers**: Mix and match providers
 - **Multi-Channel**: Telegram, Discord, Slack, WhatsApp, QQ, DingTalk, Feishu, LINE
 - **Skills System**: Install and create custom skills
 - **Memory**: Automatic context summarization
 - **Scheduling**: Cron jobs and periodic tasks
 - **Subagents**: Spawn async tasks in background
+
+## 🚀 New V16 Capabilities
+
+Phase 3 complete! The agent now has these V16-specific tools:
+
+**Desktop Control** (8 actions)
+- Screenshot capture and save
+- Mouse movement and clicking (left/right/middle)
+- Keyboard text input
+- Screen size and mouse position info
+- Window list and active window detection
+
+**Browser Automation** (8 actions)
+- Navigate to URLs
+- Take full-page screenshots
+- Click elements via CSS selectors
+- Type into form fields
+- Extract HTML content or element text
+- Execute JavaScript
+- Wait for elements to be visible
+
+**Terminal/PTY** (6 actions)
+- Open interactive shell sessions
+- Send commands to sessions
+- Get output from sessions
+- Resize terminal windows
+- Multi-session support
+- Session management (list/close)
+
+All tools are automatically available to the LLM during conversations!
 
 ## 🎯 Use Cases
 
