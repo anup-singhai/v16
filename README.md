@@ -18,6 +18,16 @@
   </p>
 </div>
 
+## 📸 Demo: Telegram Bot in Action
+
+<div align="center">
+  <img src="https://pbs.twimg.com/media/HBO3CeRaUAAmYnW?format=jpg&name=large" width="250" alt="File operations">
+  <img src="https://pbs.twimg.com/media/HBO3CePbQAAmiPR?format=jpg&name=large" width="250" alt="Web search">
+  <img src="https://pbs.twimg.com/media/HBO3DrVasAEw2Cb?format=jpg&name=large" width="250" alt="Desktop analysis">
+
+  <p><i>Real conversation with v16 bot: file operations, web search, desktop analysis</i></p>
+</div>
+
 ---
 
 ## 🌟 What is V16 Client?
