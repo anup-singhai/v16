@@ -43,8 +43,8 @@ Connect to [v16.ai](https://v16.ai) to personalize your agent from anywhere, or 
 curl -fsSL https://get.v16.ai | sh
 
 # Or build from source
-git clone https://github.com/v16ai/v16-client
-cd v16-client
+git clone https://github.com/anup-singhai/v16.git
+cd v16
 make build
 make install
 ```
@@ -173,8 +173,8 @@ v16.ai Dashboard → Socket.IO → v16 client → Tools → Response
 ## 🛠️ Building from Source
 
 ```bash
-git clone https://github.com/v16ai/v16-client
-cd v16-client
+git clone https://github.com/anup-singhai/v16.git
+cd v16
 
 # Build
 go build -o v16 ./cmd/v16
@@ -190,9 +190,9 @@ make install
 
 We welcome contributions!
 
-- **Report bugs**: [GitHub Issues](https://github.com/v16ai/v16-client/issues)
-- **Feature requests**: [Discussions](https://github.com/v16ai/v16-client/discussions)
-- **Pull requests**: See [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Report bugs**: [GitHub Issues](https://github.com/anup-singhai/v16/issues)
+- **Feature requests**: [Discussions](https://github.com/anup-singhai/v16/discussions)
+- **Pull requests**: Always welcome!
 
 ## 📜 License
 
@@ -207,7 +207,7 @@ See [CREDITS.md](CREDITS.md) for full acknowledgments.
 ## 🔗 Links
 
 - **Website**: [v16.ai](https://v16.ai)
-- **GitHub**: [github.com/v16ai/v16-client](https://github.com/v16ai/v16-client)
+- **GitHub**: [github.com/anup-singhai/v16](https://github.com/anup-singhai/v16)
 - **Original PicoClaw**: [github.com/sipeed/picoclaw](https://github.com/sipeed/picoclaw)
 
 ---
