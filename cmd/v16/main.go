@@ -36,6 +36,7 @@ import (
 	"github.com/v16ai/v16-client/pkg/skills"
 	"github.com/v16ai/v16-client/pkg/state"
 	"github.com/v16ai/v16-client/pkg/tools"
+	"github.com/v16ai/v16-client/pkg/v16"
 	"github.com/v16ai/v16-client/pkg/voice"
 )
 
@@ -190,6 +191,10 @@ func main() {
 			fmt.Printf("Unknown skills command: %s\n", subcommand)
 			skillsHelp()
 		}
+	case "connect":
+		connectCmd()
+	case "disconnect":
+		disconnectCmd()
 	case "version", "--version", "-v":
 		printVersion()
 	default:
@@ -206,7 +211,8 @@ func printHelp() {
 	fmt.Println("Commands:")
 	fmt.Println("  init        Initialize v16 configuration and workspace (alias: onboard)")
 	fmt.Println("  chat        Interact with the agent directly (alias: agent)")
-	fmt.Println("  connect     Connect to v16.ai platform (coming soon)")
+	fmt.Println("  connect     Connect to v16.ai platform")
+	fmt.Println("  disconnect  Disconnect from v16.ai platform")
 	fmt.Println("  auth        Manage authentication (login, logout, status)")
 	fmt.Println("  gateway     Start multi-channel gateway")
 	fmt.Println("  status      Show v16 status")
@@ -1415,4 +1421,89 @@ func skillsShowCmd(loader *skills.SkillsLoader, skillName string) {
 	fmt.Printf("\n📦 Skill: %s\n", skillName)
 	fmt.Println("----------------------")
 	fmt.Println(content)
+}
+
+func connectCmd() {
+	token := ""
+	serverURL := "https://api.v16.ai"
+
+	// Parse args
+	args := os.Args[2:]
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--token", "-t":
+			if i+1 < len(args) {
+				token = args[i+1]
+				i++
+			}
+		case "--server", "-s":
+			if i+1 < len(args) {
+				serverURL = args[i+1]
+				i++
+			}
+		}
+	}
+
+	if token == "" {
+		fmt.Println("❌ Error: --token required")
+		fmt.Println()
+		fmt.Println("Get your token from: https://v16.ai/dashboard")
+		fmt.Println()
+		fmt.Println("Usage:")
+		fmt.Println("  v16 connect --token YOUR_TOKEN")
+		fmt.Println()
+		fmt.Println("Options:")
+		fmt.Println("  --token, -t    Authentication token from v16.ai")
+		fmt.Println("  --server, -s   Server URL (default: https://api.v16.ai)")
+		os.Exit(1)
+	}
+
+	// Load config and create agent
+	cfg, err := loadConfig()
+	if err != nil {
+		fmt.Printf("❌ Error loading config: %v\n", err)
+		os.Exit(1)
+	}
+
+	provider, err := providers.CreateProvider(cfg)
+	if err != nil {
+		fmt.Printf("❌ Error creating provider: %v\n", err)
+		os.Exit(1)
+	}
+
+	msgBus := bus.NewMessageBus()
+	agentLoop := agent.NewAgentLoop(cfg, msgBus, provider)
+
+	// Create connector
+	connector := v16.NewV16Connector(serverURL, token, agentLoop)
+
+	fmt.Printf("%s Connecting to %s...\n", logo, serverURL)
+
+	err = connector.Connect()
+	if err != nil {
+		fmt.Printf("❌ Connection failed: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("✅ Connected to v16.ai!")
+	fmt.Println()
+	fmt.Println("Your agent is now controllable from https://v16.ai/dashboard")
+	fmt.Println()
+	fmt.Println("Press Ctrl+C to disconnect")
+
+	// Handle interrupts
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt)
+
+	<-sigChan
+
+	fmt.Println()
+	fmt.Println("Disconnecting...")
+	connector.Disconnect()
+	fmt.Println("✅ Disconnected")
+}
+
+func disconnectCmd() {
+	fmt.Println("Disconnect command - connection state is managed in connect command")
+	fmt.Println("Use Ctrl+C in the connect session to disconnect")
 }

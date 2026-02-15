@@ -788,3 +788,17 @@ func (al *AgentLoop) estimateTokens(messages []providers.Message) int {
 	}
 	return total
 }
+
+// GetTool returns a tool by name from the registry
+func (al *AgentLoop) GetTool(name string) tools.Tool {
+	tool, ok := al.tools.Get(name)
+	if !ok {
+		return nil
+	}
+	return tool
+}
+
+// GetToolNames returns list of all registered tool names
+func (al *AgentLoop) GetToolNames() []string {
+	return al.tools.List()
+}
