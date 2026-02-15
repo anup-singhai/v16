@@ -36,60 +36,97 @@ Connect to [v16.ai](https://v16.ai) to personalize your agent from anywhere, or 
 
 ## 🚀 Quick Start
 
-### 1. Download & Install
+### Option 1: Telegram Bot (Easiest - 2 minutes!)
+
+The fastest way to get started:
 
 ```bash
-# Coming soon: One-line installer
-curl -fsSL https://get.v16.ai | sh
-
-# Or build from source
-git clone https://github.com/anup-singhai/v16.git
-cd v16
+# 1. Build v16
+git clone https://github.com/anup-singhai/v16-client.git
+cd v16-client
 make build
-make install
-```
+./build/v16 init
 
-### 2. Initialize
+# 2. Create Telegram bot
+# - Open Telegram, search for @BotFather
+# - Send: /newbot
+# - Follow prompts, copy your bot token
 
-```bash
-v16 init
-```
-
-This creates `~/.v16/config.json` and workspace.
-
-### 3. Configure Your LLM Provider
-
-Edit `~/.v16/config.json`:
-
-```json
+# 3. Configure (edit ~/.v16/config.json)
 {
   "agents": {
     "defaults": {
-      "model": "gpt-4o"
+      "provider": "moonshot",  // or anthropic, openai, etc.
+      "model": "moonshot-v1-128k"
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "token": "YOUR_BOT_TOKEN"
     }
   },
   "providers": {
-    "openai": {
-      "api_key": "sk-..."
+    "moonshot": {
+      "api_key": "sk-...",
+      "api_base": "https://api.moonshot.ai/v1"
     }
   }
 }
+
+# 4. Start gateway
+./build/v16 gateway
+
+# 5. Chat with your bot on Telegram!
+# Search for your bot and send: "List files in this directory"
 ```
 
-**Supported Providers** (14+): OpenAI, Anthropic, Gemini, Zhipu, Groq, DeepSeek, Moonshot, Nvidia, OpenRouter, local models (vLLM), and more!
-
-### 4. Start Using
+### Option 2: CLI Mode
 
 ```bash
-# One-off message
+# 1. Build & Install
+git clone https://github.com/anup-singhai/v16-client.git
+cd v16-client
+make build
+make install
+
+# 2. Initialize
+v16 init
+
+# 3. Configure provider (edit ~/.v16/config.json)
+{
+  "agents": {
+    "defaults": {
+      "provider": "anthropic",
+      "model": "claude-3-5-sonnet-20241022"
+    }
+  },
+  "providers": {
+    "anthropic": {
+      "api_key": "sk-ant-..."
+    }
+  }
+}
+
+# 4. Start using
 v16 chat -m "Write a Python script to analyze CSV files"
-
-# Interactive mode
-v16 chat
-
-# Connect to v16.ai platform (coming soon)
-v16 connect --token YOUR_TOKEN
+v16 chat  # Interactive mode
 ```
+
+### Supported LLM Providers (14+)
+
+| Provider | Models | API Base |
+|----------|--------|----------|
+| **Anthropic** | Claude 3.5 Sonnet, Opus, Haiku | https://api.anthropic.com |
+| **Moonshot AI** | Kimi K2.5, moonshot-v1-128k | https://api.moonshot.ai/v1 |
+| **OpenAI** | GPT-4, GPT-3.5 | https://api.openai.com/v1 |
+| **Google** | Gemini Pro, Flash | https://generativelanguage.googleapis.com |
+| **Groq** | Llama 3, Mixtral (fast) | https://api.groq.com/openai/v1 |
+| **DeepSeek** | DeepSeek-V2 | https://api.deepseek.com |
+| **Zhipu** | GLM-4 | https://open.bigmodel.cn/api/paas/v4 |
+| **Local** | Ollama, vLLM | http://localhost |
+
+And more: OpenRouter, Nvidia, GitHub Copilot
 
 ## ✨ Features
 
@@ -109,8 +146,8 @@ v16 connect --token YOUR_TOKEN
 ### AI Features
 
 - **21 Tools**: Desktop, browser, terminal, files, code, web, hardware, and more
-- **14+ LLM Providers**: Mix and match providers
-- **Multi-Channel**: Telegram, Discord, Slack, WhatsApp, QQ, DingTalk, Feishu, LINE
+- **14+ LLM Providers**: Mix and match providers (Anthropic, Moonshot/Kimi, OpenAI, Gemini, etc.)
+- **Multi-Channel**: **Telegram** (easiest!), Discord, Slack, WhatsApp, QQ, DingTalk, Feishu, LINE
 - **Skills System**: Install and create custom skills
 - **Memory**: Automatic context summarization
 - **Scheduling**: Cron jobs and periodic tasks
