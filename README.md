@@ -100,15 +100,15 @@ v16 connect --token YOUR_TOKEN
 | **Desktop** | ✅ Screen capture, mouse/keyboard control, window management |
 | **Browser** | ✅ Navigate, fill forms, extract data, screenshots |
 | **Terminal** | ✅ Interactive shell sessions, command execution, multi-session |
-| **Files** | Read, write, edit, search (grep), pattern match (glob) |
-| **Code** | Git operations, diff editing (enhanced tools coming soon) |
+| **Files** | ✅ Read, write, edit, search (grep), pattern match (glob) |
+| **Code** | ✅ Git operations (status, diff, log, commit, push, pull, branch) |
 | **Web** | Search (Brave/DuckDuckGo), fetch content |
 | **System** | Cron scheduling, task tracking |
 | **Hardware** | I2C/SPI devices (Linux only) |
 
 ### AI Features
 
-- **18 Tools**: Desktop, browser, terminal, files, web, hardware, and more
+- **21 Tools**: Desktop, browser, terminal, files, code, web, hardware, and more
 - **14+ LLM Providers**: Mix and match providers
 - **Multi-Channel**: Telegram, Discord, Slack, WhatsApp, QQ, DingTalk, Feishu, LINE
 - **Skills System**: Install and create custom skills
@@ -118,7 +118,7 @@ v16 connect --token YOUR_TOKEN
 
 ## 🚀 New V16 Capabilities
 
-Phase 3 complete! The agent now has these V16-specific tools:
+Phase 3 complete! The agent now has these powerful tools:
 
 **Desktop Control** (8 actions)
 - Screenshot capture and save
@@ -144,7 +144,12 @@ Phase 3 complete! The agent now has these V16-specific tools:
 - Multi-session support
 - Session management (list/close)
 
-All tools are automatically available to the LLM during conversations!
+**Enhanced Code Tools** (3 tools)
+- **Grep**: Fast code search with ripgrep, regex support, file filtering
+- **Glob**: Pattern matching (**.go, **/*.ts), sorted by name/mtime
+- **Git**: 9 operations (status, diff, log, commit, push, pull, branch, add, show)
+
+All 21 tools are automatically available to the LLM during conversations!
 
 ## 🎯 Use Cases
 
