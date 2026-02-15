@@ -86,6 +86,9 @@ func createToolRegistry(workspace string, restrict bool, cfg *config.Config, msg
 	registry.Register(tools.NewI2CTool())
 	registry.Register(tools.NewSPITool())
 
+	// Desktop control - V16 capability
+	registry.Register(tools.NewDesktopTool())
+
 	// Message tool - available to both agent and subagent
 	// Subagent uses it to communicate directly with user
 	messageTool := tools.NewMessageTool()
