@@ -404,6 +404,41 @@
             color: #8B7355;
         }
 
+        .workspace-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .workspace-presets {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            background: rgba(139, 115, 85, 0.15);
+            border: 1px solid #8B7355;
+            color: #8B7355;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .preset-btn:hover {
+            background: rgba(139, 115, 85, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(139, 115, 85, 0.3);
+        }
+
+        .preset-btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -756,17 +791,24 @@
 
             <div style="margin-top: 30px;">
                 <h3 style="color: #A67C52; margin-bottom: 15px;">Default Agent Settings</h3>
-                <div class="grid">
-                    <div class="form-group">
-                        <label>Workspace Path</label>
+                <div class="form-group">
+                    <label>Workspace Path</label>
+                    <div class="workspace-input-group">
                         <input type="text" id="default-workspace" placeholder="~/.v16/workspace">
-                        <p class="help-text">Default working directory for agents</p>
+                        <div class="workspace-presets">
+                            <button type="button" class="preset-btn" onclick="setWorkspace('default', '~/.v16/workspace')">Default</button>
+                            <button type="button" class="preset-btn" onclick="setWorkspace('default', '~/Documents')">Documents</button>
+                            <button type="button" class="preset-btn" onclick="setWorkspace('default', '~/Downloads')">Downloads</button>
+                            <button type="button" class="preset-btn" onclick="setWorkspace('default', '~/Desktop')">Desktop</button>
+                            <button type="button" class="preset-btn" onclick="setWorkspace('default', '~/projects')">Projects</button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Max Tool Iterations</label>
-                        <input type="number" id="default-max-iterations" placeholder="50">
-                        <p class="help-text">Maximum number of tool calls per agent task</p>
-                    </div>
+                    <p class="help-text">Default working directory for agents</p>
+                </div>
+                <div class="form-group">
+                    <label>Max Tool Iterations</label>
+                    <input type="number" id="default-max-iterations" placeholder="50">
+                    <p class="help-text">Maximum number of tool calls per agent task</p>
                 </div>
                 <div class="form-group" style="margin-top: 20px;">
                     <label class="checkbox-label">
@@ -835,7 +877,16 @@
 
                 <div class="form-group">
                     <label>Workspace Path</label>
-                    <input type="text" id="agent-workspace" placeholder="~/.v16/workspace">
+                    <div class="workspace-input-group">
+                        <input type="text" id="agent-workspace" placeholder="~/.v16/workspace">
+                        <div class="workspace-presets">
+                            <button type="button" class="preset-btn" onclick="setWorkspace('agent', '~/.v16/workspace')">Default</button>
+                            <button type="button" class="preset-btn" onclick="setWorkspace('agent', '~/Documents')">Documents</button>
+                            <button type="button" class="preset-btn" onclick="setWorkspace('agent', '~/Downloads')">Downloads</button>
+                            <button type="button" class="preset-btn" onclick="setWorkspace('agent', '~/Desktop')">Desktop</button>
+                            <button type="button" class="preset-btn" onclick="setWorkspace('agent', '~/projects')">Projects</button>
+                        </div>
+                    </div>
                     <p class="help-text">Working directory for this agent. Leave empty to use global default.</p>
                 </div>
 

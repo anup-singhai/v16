@@ -440,6 +440,15 @@ function generateId() {
     return 'agent-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 }
 
+// Set workspace path (for preset buttons)
+function setWorkspace(type, path) {
+    if (type === 'agent') {
+        document.getElementById('agent-workspace').value = path;
+    } else if (type === 'default') {
+        document.getElementById('default-workspace').value = path;
+    }
+}
+
 // Load initial data
 window.addEventListener('DOMContentLoaded', () => {
     loadConfig();
