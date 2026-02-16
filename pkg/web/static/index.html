@@ -342,11 +342,18 @@
             <div class="form-group">
                 <label>Provider</label>
                 <select id="agent-provider">
-                    <option value="openrouter">OpenRouter</option>
                     <option value="anthropic">Anthropic</option>
                     <option value="openai">OpenAI</option>
-                    <option value="gemini">Gemini</option>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="moonshot">Moonshot AI (Kimi)</option>
+                    <option value="deepseek">DeepSeek</option>
                     <option value="groq">Groq</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="zhipu">Zhipu (GLM)</option>
+                    <option value="nvidia">Nvidia</option>
+                    <option value="github_copilot">GitHub Copilot</option>
+                    <option value="vllm">vLLM (Local)</option>
+                    <option value="shengsuanyun">ShengSuanYun</option>
                 </select>
             </div>
 
@@ -430,29 +437,63 @@
             <h2 style="color: #8B7355; margin-bottom: 20px;">Provider API Keys</h2>
 
             <div class="form-group">
-                <label>OpenRouter API Key</label>
-                <input type="text" id="provider-openrouter" placeholder="sk-or-v1-...">
-                <p class="help-text">Get key from https://openrouter.ai/keys</p>
-            </div>
-
-            <div class="form-group">
                 <label>Anthropic API Key</label>
                 <input type="text" id="provider-anthropic" placeholder="sk-ant-...">
+                <p class="help-text">Claude models from https://console.anthropic.com</p>
             </div>
 
             <div class="form-group">
                 <label>OpenAI API Key</label>
                 <input type="text" id="provider-openai" placeholder="sk-...">
+                <p class="help-text">GPT models from https://platform.openai.com</p>
             </div>
 
             <div class="form-group">
-                <label>Gemini API Key</label>
-                <input type="text" id="provider-gemini" placeholder="AIza...">
+                <label>OpenRouter API Key</label>
+                <input type="text" id="provider-openrouter" placeholder="sk-or-v1-...">
+                <p class="help-text">Access 100+ models from https://openrouter.ai/keys</p>
+            </div>
+
+            <div class="form-group">
+                <label>Moonshot AI API Key</label>
+                <input type="text" id="provider-moonshot" placeholder="sk-...">
+                <p class="help-text">Kimi models from https://platform.moonshot.cn</p>
+            </div>
+
+            <div class="form-group">
+                <label>DeepSeek API Key</label>
+                <input type="text" id="provider-deepseek" placeholder="sk-...">
+                <p class="help-text">From https://platform.deepseek.com</p>
             </div>
 
             <div class="form-group">
                 <label>Groq API Key</label>
                 <input type="text" id="provider-groq" placeholder="gsk_...">
+                <p class="help-text">Fast inference from https://console.groq.com</p>
+            </div>
+
+            <div class="form-group">
+                <label>Google Gemini API Key</label>
+                <input type="text" id="provider-gemini" placeholder="AIza...">
+                <p class="help-text">From https://aistudio.google.com/apikey</p>
+            </div>
+
+            <div class="form-group">
+                <label>Zhipu API Key</label>
+                <input type="text" id="provider-zhipu" placeholder="...">
+                <p class="help-text">GLM models from https://open.bigmodel.cn</p>
+            </div>
+
+            <div class="form-group">
+                <label>Nvidia API Key</label>
+                <input type="text" id="provider-nvidia" placeholder="nvapi-...">
+                <p class="help-text">From https://build.nvidia.com</p>
+            </div>
+
+            <div class="form-group">
+                <label>vLLM API Base URL</label>
+                <input type="text" id="provider-vllm" placeholder="http://localhost:8000">
+                <p class="help-text">Local vLLM or Ollama server URL</p>
             </div>
         </div>
 

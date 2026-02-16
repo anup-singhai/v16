@@ -91,11 +91,16 @@ function populateForm(config) {
     document.getElementById('slack-token').value = config.channels?.slack?.bot_token || '';
 
     // Providers
-    document.getElementById('provider-openrouter').value = config.providers?.openrouter?.api_key || '';
     document.getElementById('provider-anthropic').value = config.providers?.anthropic?.api_key || '';
     document.getElementById('provider-openai').value = config.providers?.openai?.api_key || '';
-    document.getElementById('provider-gemini').value = config.providers?.gemini?.api_key || '';
+    document.getElementById('provider-openrouter').value = config.providers?.openrouter?.api_key || '';
+    document.getElementById('provider-moonshot').value = config.providers?.moonshot?.api_key || '';
+    document.getElementById('provider-deepseek').value = config.providers?.deepseek?.api_key || '';
     document.getElementById('provider-groq').value = config.providers?.groq?.api_key || '';
+    document.getElementById('provider-gemini').value = config.providers?.gemini?.api_key || '';
+    document.getElementById('provider-zhipu').value = config.providers?.zhipu?.api_key || '';
+    document.getElementById('provider-nvidia').value = config.providers?.nvidia?.api_key || '';
+    document.getElementById('provider-vllm').value = config.providers?.vllm?.api_base || '';
 }
 
 // Collect form data
@@ -132,20 +137,35 @@ function collectFormData() {
     // Providers
     config.providers = config.providers || {};
 
-    config.providers.openrouter = config.providers.openrouter || {};
-    config.providers.openrouter.api_key = document.getElementById('provider-openrouter').value;
-
     config.providers.anthropic = config.providers.anthropic || {};
     config.providers.anthropic.api_key = document.getElementById('provider-anthropic').value;
 
     config.providers.openai = config.providers.openai || {};
     config.providers.openai.api_key = document.getElementById('provider-openai').value;
 
-    config.providers.gemini = config.providers.gemini || {};
-    config.providers.gemini.api_key = document.getElementById('provider-gemini').value;
+    config.providers.openrouter = config.providers.openrouter || {};
+    config.providers.openrouter.api_key = document.getElementById('provider-openrouter').value;
+
+    config.providers.moonshot = config.providers.moonshot || {};
+    config.providers.moonshot.api_key = document.getElementById('provider-moonshot').value;
+
+    config.providers.deepseek = config.providers.deepseek || {};
+    config.providers.deepseek.api_key = document.getElementById('provider-deepseek').value;
 
     config.providers.groq = config.providers.groq || {};
     config.providers.groq.api_key = document.getElementById('provider-groq').value;
+
+    config.providers.gemini = config.providers.gemini || {};
+    config.providers.gemini.api_key = document.getElementById('provider-gemini').value;
+
+    config.providers.zhipu = config.providers.zhipu || {};
+    config.providers.zhipu.api_key = document.getElementById('provider-zhipu').value;
+
+    config.providers.nvidia = config.providers.nvidia || {};
+    config.providers.nvidia.api_key = document.getElementById('provider-nvidia').value;
+
+    config.providers.vllm = config.providers.vllm || {};
+    config.providers.vllm.api_base = document.getElementById('provider-vllm').value;
 
     return config;
 }
