@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V16 Agent Configuration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        h1 {
+            color: #8B7355;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab:hover {
+            color: #8B7355;
+        }
+
+        .tab.active {
+            color: #8B7355;
+            border-bottom-color: #8B7355;
+        }
+
+        .tab-content {
+            display: none;
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #8B7355;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #8B7355;
+        }
+
+        textarea {
+            min-height: 100px;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #8B7355 0%, #A67C52 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 115, 85, 0.3);
+        }
+
+        button.secondary {
+            background: transparent;
+            border: 1px solid #8B7355;
+            color: #8B7355;
+        }
+
+        button.secondary:hover {
+            background: rgba(139, 115, 85, 0.1);
+        }
+
+        .status-card {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .status-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .status-value {
+            color: #e0e0e0;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-indicator.enabled {
+            background: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .status-indicator.disabled {
+            background: #666;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+        }
+
+        .message.error {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            color: #f44336;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 V16 Agent Configuration</h1>
+            <p class="subtitle">Configure your autonomous AI agents</p>
+        </header>
+
+        <div id="message" class="message"></div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="status">Status</button>
+            <button class="tab" data-tab="agents">Agents</button>
+            <button class="tab" data-tab="channels">Channels</button>
+            <button class="tab" data-tab="providers">Providers</button>
+        </div>
+
+        <!-- Status Tab -->
+        <div id="status-tab" class="tab-content active">
+            <h2 style="color: #8B7355; margin-bottom: 20px;">System Status</h2>
+            <div class="status-card">
+                <div class="status-row">
+                    <span class="status-label">Config Path</span>
+                    <span class="status-value" id="status-config-path">-</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Workspace</span>
+                    <span class="status-value" id="status-workspace">-</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Provider</span>
+                    <span class="status-value" id="status-provider">-</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Model</span>
+                    <span class="status-value" id="status-model">-</span>
+                </div>
+            </div>
+
+            <h3 style="color: #8B7355; margin: 30px 0 20px 0;">Channels</h3>
+            <div class="status-card">
+                <div class="status-row">
+                    <span class="status-label">Telegram</span>
+                    <span class="status-value" id="status-telegram">
+                        <span class="status-indicator disabled"></span> Disabled
+                    </span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Discord</span>
+                    <span class="status-value" id="status-discord">
+                        <span class="status-indicator disabled"></span> Disabled
+                    </span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Slack</span>
+                    <span class="status-value" id="status-slack">
+                        <span class="status-indicator disabled"></span> Disabled
+                    </span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button onclick="loadStatus()">Refresh Status</button>
+            </div>
+        </div>
+
+        <!-- Agents Tab -->
+        <div id="agents-tab" class="tab-content">
+            <h2 style="color: #8B7355; margin-bottom: 20px;">Agent Configuration</h2>
+
+            <div class="form-group">
+                <label>Workspace Path</label>
+                <input type="text" id="agent-workspace" placeholder="~/workspace">
+                <p class="help-text">Directory where agent files are stored</p>
+            </div>
+
+            <div class="form-group">
+                <label>Provider</label>
+                <select id="agent-provider">
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="anthropic">Anthropic</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="gemini">Gemini</option>
+                    <option value="groq">Groq</option>
+                </select>
+            </div>
+
+            <div class="grid">
+                <div class="form-group">
+                    <label>Model</label>
+                    <input type="text" id="agent-model" placeholder="anthropic/claude-3-5-sonnet">
+                </div>
+
+                <div class="form-group">
+                    <label>Max Tokens</label>
+                    <input type="number" id="agent-max-tokens" placeholder="4096">
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="form-group">
+                    <label>Temperature</label>
+                    <input type="number" id="agent-temperature" step="0.1" min="0" max="2" placeholder="0.7">
+                </div>
+
+                <div class="form-group">
+                    <label>Max Tool Iterations</label>
+                    <input type="number" id="agent-max-iterations" placeholder="50">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="agent-restrict">
+                    <label style="margin: 0;">Restrict to Workspace</label>
+                </div>
+                <p class="help-text">Prevent agent from accessing files outside workspace</p>
+            </div>
+        </div>
+
+        <!-- Channels Tab -->
+        <div id="channels-tab" class="tab-content">
+            <h2 style="color: #8B7355; margin-bottom: 20px;">Channel Configuration</h2>
+
+            <h3 style="color: #A67C52; margin: 20px 0;">Telegram</h3>
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="telegram-enabled">
+                    <label style="margin: 0;">Enable Telegram</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Bot Token</label>
+                <input type="text" id="telegram-token" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11">
+                <p class="help-text">Get token from @BotFather on Telegram</p>
+            </div>
+
+            <h3 style="color: #A67C52; margin: 30px 0 20px 0;">Discord</h3>
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="discord-enabled">
+                    <label style="margin: 0;">Enable Discord</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Bot Token</label>
+                <input type="text" id="discord-token" placeholder="Your Discord bot token">
+            </div>
+
+            <h3 style="color: #A67C52; margin: 30px 0 20px 0;">Slack</h3>
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="slack-enabled">
+                    <label style="margin: 0;">Enable Slack</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Bot Token</label>
+                <input type="text" id="slack-token" placeholder="xoxb-your-token">
+            </div>
+        </div>
+
+        <!-- Providers Tab -->
+        <div id="providers-tab" class="tab-content">
+            <h2 style="color: #8B7355; margin-bottom: 20px;">Provider API Keys</h2>
+
+            <div class="form-group">
+                <label>OpenRouter API Key</label>
+                <input type="text" id="provider-openrouter" placeholder="sk-or-v1-...">
+                <p class="help-text">Get key from https://openrouter.ai/keys</p>
+            </div>
+
+            <div class="form-group">
+                <label>Anthropic API Key</label>
+                <input type="text" id="provider-anthropic" placeholder="sk-ant-...">
+            </div>
+
+            <div class="form-group">
+                <label>OpenAI API Key</label>
+                <input type="text" id="provider-openai" placeholder="sk-...">
+            </div>
+
+            <div class="form-group">
+                <label>Gemini API Key</label>
+                <input type="text" id="provider-gemini" placeholder="AIza...">
+            </div>
+
+            <div class="form-group">
+                <label>Groq API Key</label>
+                <input type="text" id="provider-groq" placeholder="gsk_...">
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button onclick="saveConfig()">Save Configuration</button>
+            <button class="secondary" onclick="loadConfig()">Reset Changes</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

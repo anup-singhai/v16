@@ -38,6 +38,7 @@ import (
 	"github.com/v16ai/v16-client/pkg/tools"
 	"github.com/v16ai/v16-client/pkg/v16"
 	"github.com/v16ai/v16-client/pkg/voice"
+	"github.com/v16ai/v16-client/pkg/web"
 )
 
 //go:generate cp -r ../../workspace .
@@ -195,6 +196,8 @@ func main() {
 		connectCmd()
 	case "disconnect":
 		disconnectCmd()
+	case "web", "ui":
+		webCmd()
 	case "version", "--version", "-v":
 		printVersion()
 	default:
@@ -211,6 +214,7 @@ func printHelp() {
 	fmt.Println("Commands:")
 	fmt.Println("  init        Initialize v16 configuration and workspace (alias: onboard)")
 	fmt.Println("  chat        Interact with the agent directly (alias: agent)")
+	fmt.Println("  web         Start web UI for configuration (alias: ui)")
 	fmt.Println("  connect     Connect to v16.ai platform")
 	fmt.Println("  disconnect  Disconnect from v16.ai platform")
 	fmt.Println("  auth        Manage authentication (login, logout, status)")
@@ -222,7 +226,8 @@ func printHelp() {
 	fmt.Println()
 	fmt.Println("Get started:")
 	fmt.Println("  1. v16 init")
-	fmt.Println("  2. Configure at ~/.v16/config.json")
+	fmt.Println("  2. v16 web           (configure via browser)")
+	fmt.Println("     OR edit ~/.v16/config.json manually")
 	fmt.Println("  3. v16 chat -m \"Hello!\"")
 }
 
@@ -1465,14 +1470,25 @@ func connectCmd() {
 		os.Exit(1)
 	}
 
+	// For connected mode, provider is optional (commands come from backend)
+	// Use a minimal config that doesn't require API keys
 	provider, err := providers.CreateProvider(cfg)
 	if err != nil {
-		fmt.Printf("❌ Error creating provider: %v\n", err)
-		os.Exit(1)
+		// If provider creation fails, create a dummy one since we don't need it for connected mode
+		fmt.Println("⚠️  Warning: LLM provider not configured (not needed for connected mode)")
+		provider = nil
 	}
 
 	msgBus := bus.NewMessageBus()
-	agentLoop := agent.NewAgentLoop(cfg, msgBus, provider)
+
+	// Pass nil provider if we don't have one - agent loop only uses it for standalone chat
+	var agentLoop *agent.AgentLoop
+	if provider != nil {
+		agentLoop = agent.NewAgentLoop(cfg, msgBus, provider)
+	} else {
+		// Create agent loop without provider for connected mode
+		agentLoop = agent.NewAgentLoop(cfg, msgBus, nil)
+	}
 
 	// Create connector
 	connector := v16.NewV16Connector(serverURL, token, agentLoop)
@@ -1506,4 +1522,44 @@ func connectCmd() {
 func disconnectCmd() {
 	fmt.Println("Disconnect command - connection state is managed in connect command")
 	fmt.Println("Use Ctrl+C in the connect session to disconnect")
+}
+
+func webCmd() {
+	addr := "localhost:8080"
+
+	// Parse args for custom address
+	args := os.Args[2:]
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--addr", "-a":
+			if i+1 < len(args) {
+				addr = args[i+1]
+				i++
+			}
+		case "--port", "-p":
+			if i+1 < len(args) {
+				addr = "localhost:" + args[i+1]
+				i++
+			}
+		}
+	}
+
+	cfg, err := loadConfig()
+	if err != nil {
+		fmt.Printf("❌ Error loading config: %v\n", err)
+		fmt.Println()
+		fmt.Println("Run 'v16 init' first to create configuration")
+		os.Exit(1)
+	}
+
+	configPath := getConfigPath()
+	server := web.NewServer(cfg, configPath, addr)
+
+	fmt.Printf("%s Starting V16 Web UI...\n", logo)
+	fmt.Println()
+
+	if err := server.Start(); err != nil {
+		fmt.Printf("❌ Error starting web server: %v\n", err)
+		os.Exit(1)
+	}
 }

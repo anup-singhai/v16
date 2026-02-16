@@ -123,6 +123,43 @@ v16 chat -m "Write a Python script to analyze CSV files"
 v16 chat  # Interactive mode
 ```
 
+### Option 3: Web UI (New! 🎨)
+
+Configure your agent through a browser instead of editing JSON files:
+
+```bash
+# 1. Build & Install
+git clone https://github.com/anup-singhai/v16-client.git
+cd v16-client
+make build
+make install
+
+# 2. Initialize
+v16 init
+
+# 3. Start Web UI
+v16 web
+
+# 4. Configure in browser
+# Open http://localhost:8080
+# - Set your LLM provider & API keys
+# - Configure Telegram/Discord/Slack
+# - Enable autonomous behaviors
+# - Click Save
+
+# 5. Start gateway with new config
+v16 gateway
+```
+
+**Web UI Features:**
+- 🎛️ Form-based configuration (no JSON editing)
+- 📊 Live status dashboard
+- 🔑 Provider API key management
+- 📱 Channel configuration (Telegram, Discord, Slack)
+- 💾 Auto-validation before saving
+
+See [WEB_UI.md](WEB_UI.md) for details.
+
 ### Supported LLM Providers (14+)
 
 | Provider | Models | API Base |
