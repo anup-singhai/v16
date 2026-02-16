@@ -97,6 +97,9 @@ function renderAgents() {
         const cronCount = agent.cron_jobs ? agent.cron_jobs.length : 0;
         const cronText = cronCount === 1 ? '1 scheduled task' : `${cronCount} scheduled tasks`;
 
+        const workspacePath = agent.workspace || '(default)';
+        const workspaceRestricted = agent.restrict_to_workspace ? ' 🔒' : '';
+
         card.innerHTML = `
             <div class="agent-header">
                 <div class="agent-name">@${agent.name}</div>
@@ -111,6 +114,10 @@ function renderAgents() {
                 <div class="agent-detail">
                     <span class="detail-label">Model</span>
                     <span class="detail-value">${agent.model}</span>
+                </div>
+                <div class="agent-detail">
+                    <span class="detail-label">Workspace</span>
+                    <span class="detail-value">${workspacePath}${workspaceRestricted}</span>
                 </div>
                 <div class="agent-detail">
                     <span class="detail-label">Autonomous Tasks</span>
@@ -151,6 +158,8 @@ function openAgentModal(agentId = null) {
     document.getElementById('agent-model').value = '';
     document.getElementById('agent-max-tokens').value = '4096';
     document.getElementById('agent-temperature').value = '0.7';
+    document.getElementById('agent-workspace').value = '';
+    document.getElementById('agent-restrict-workspace').checked = false;
     document.getElementById('agent-enabled').checked = true;
     cronJobs = [];
     renderCronJobs();
@@ -169,6 +178,8 @@ function openAgentModal(agentId = null) {
             document.getElementById('agent-model').value = agent.model;
             document.getElementById('agent-max-tokens').value = agent.max_tokens || 4096;
             document.getElementById('agent-temperature').value = agent.temperature || 0.7;
+            document.getElementById('agent-workspace').value = agent.workspace || '';
+            document.getElementById('agent-restrict-workspace').checked = agent.restrict_to_workspace || false;
             document.getElementById('agent-enabled').checked = agent.enabled !== false;
             cronJobs = agent.cron_jobs || [];
             renderCronJobs();
@@ -219,6 +230,8 @@ function saveAgent() {
     const model = document.getElementById('agent-model').value.trim();
     const maxTokens = parseInt(document.getElementById('agent-max-tokens').value) || 4096;
     const temperature = parseFloat(document.getElementById('agent-temperature').value) || 0.7;
+    const workspace = document.getElementById('agent-workspace').value.trim();
+    const restrictWorkspace = document.getElementById('agent-restrict-workspace').checked;
     const enabled = document.getElementById('agent-enabled').checked;
 
     if (!name) {
@@ -239,6 +252,8 @@ function saveAgent() {
         model: model,
         max_tokens: maxTokens,
         temperature: temperature,
+        workspace: workspace,
+        restrict_to_workspace: restrictWorkspace,
         enabled: enabled,
         cron_jobs: cronJobs
     };

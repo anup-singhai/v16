@@ -834,6 +834,20 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Workspace Path</label>
+                    <input type="text" id="agent-workspace" placeholder="~/.v16/workspace">
+                    <p class="help-text">Working directory for this agent. Leave empty to use global default.</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="agent-restrict-workspace">
+                        <span>Restrict this agent to workspace directory</span>
+                    </label>
+                    <p class="help-text">When enabled, this agent can only access files within its workspace path</p>
+                </div>
+
+                <div class="form-group">
                     <label>Cron Jobs (Autonomous Behaviors)</label>
                     <div class="cron-list" id="cron-list">
                         <!-- Cron jobs will be added here -->
