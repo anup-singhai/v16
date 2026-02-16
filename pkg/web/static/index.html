@@ -463,6 +463,71 @@
             transform: translateY(0);
         }
 
+        .folder-browser {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .current-path {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .current-path label {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .current-path input {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            color: #8B7355;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .folder-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #0a0a0a;
+        }
+
+        .folder-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #222;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .folder-item:hover {
+            background: rgba(139, 115, 85, 0.1);
+        }
+
+        .folder-item:last-child {
+            border-bottom: none;
+        }
+
+        .folder-item.parent {
+            background: rgba(139, 115, 85, 0.05);
+            font-weight: 500;
+        }
+
+        .folder-icon {
+            font-size: 1.2rem;
+        }
+
+        .folder-name {
+            flex: 1;
+            color: #e0e0e0;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -844,6 +909,31 @@
                     </label>
                     <p class="help-text">When enabled, agents can only access files within the workspace path (security feature)</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Folder Browser Modal -->
+    <div id="folder-browser-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Select Workspace Folder</h2>
+                <button class="modal-close" onclick="closeFolderBrowser()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="folder-browser">
+                    <div class="current-path">
+                        <label>Current Path:</label>
+                        <input type="text" id="browser-current-path" readonly>
+                    </div>
+                    <div class="folder-list" id="folder-list">
+                        <!-- Folders will be listed here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" onclick="closeFolderBrowser()">Cancel</button>
+                <button onclick="selectCurrentFolder()">Select This Folder</button>
             </div>
         </div>
     </div>

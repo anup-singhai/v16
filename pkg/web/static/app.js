@@ -449,30 +449,81 @@ function setWorkspace(type, path) {
     }
 }
 
+// Global variable for folder browser
+let folderBrowserType = 'agent';
+
 // Browse for workspace directory
-function browseWorkspace(type) {
+async function browseWorkspace(type) {
+    folderBrowserType = type;
+
     const currentPath = type === 'agent'
         ? document.getElementById('agent-workspace').value
         : document.getElementById('default-workspace').value;
 
-    const path = prompt(
-        'Enter workspace directory path:\n\n' +
-        'Common paths:\n' +
-        '  ~/Documents\n' +
-        '  ~/Desktop\n' +
-        '  ~/Downloads\n' +
-        '  ~/projects\n' +
-        '  ~/projects/v16\n' +
-        '  ~/.v16/workspace\n\n' +
-        'You can use:\n' +
-        '  ~ for home directory\n' +
-        '  Absolute paths like /Users/username/folder',
-        currentPath || '~/'
-    );
+    // Open folder browser modal
+    document.getElementById('folder-browser-modal').classList.add('active');
 
-    if (path !== null && path.trim() !== '') {
-        setWorkspace(type, path.trim());
+    // Load folders starting from current path or home
+    await loadFolders(currentPath || '~');
+}
+
+// Load folders from path
+async function loadFolders(path) {
+    try {
+        const response = await fetch(`/api/browse?path=${encodeURIComponent(path)}`);
+        if (!response.ok) throw new Error('Failed to load folders');
+
+        const data = await response.json();
+
+        // Update current path display
+        document.getElementById('browser-current-path').value = data.current;
+
+        // Render folder list
+        const folderList = document.getElementById('folder-list');
+        folderList.innerHTML = '';
+
+        // Add parent directory option if not at root
+        if (data.parent) {
+            const parentItem = document.createElement('div');
+            parentItem.className = 'folder-item parent';
+            parentItem.onclick = () => loadFolders(data.parent);
+            parentItem.innerHTML = `
+                <span class="folder-icon">⬆️</span>
+                <span class="folder-name">.. (Parent Directory)</span>
+            `;
+            folderList.appendChild(parentItem);
+        }
+
+        // Add directories
+        if (data.dirs && data.dirs.length > 0) {
+            data.dirs.forEach(dir => {
+                const item = document.createElement('div');
+                item.className = 'folder-item';
+                item.onclick = () => loadFolders(dir.path);
+                item.innerHTML = `
+                    <span class="folder-icon">📁</span>
+                    <span class="folder-name">${dir.name}</span>
+                `;
+                folderList.appendChild(item);
+            });
+        } else {
+            folderList.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No subdirectories</div>';
+        }
+    } catch (error) {
+        showMessage('Error loading folders: ' + error.message, 'error');
     }
+}
+
+// Select current folder
+function selectCurrentFolder() {
+    const currentPath = document.getElementById('browser-current-path').value;
+    setWorkspace(folderBrowserType, currentPath);
+    closeFolderBrowser();
+}
+
+// Close folder browser modal
+function closeFolderBrowser() {
+    document.getElementById('folder-browser-modal').classList.remove('active');
 }
 
 // Load initial data

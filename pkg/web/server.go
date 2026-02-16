@@ -46,6 +46,7 @@ func (s *Server) Start() error {
 	http.HandleFunc("/api/config", s.handleConfig)
 	http.HandleFunc("/api/config/save", s.handleConfigSave)
 	http.HandleFunc("/api/status", s.handleStatus)
+	http.HandleFunc("/api/browse", s.handleBrowse)
 
 	logger.InfoCF("web", "Starting web UI", map[string]interface{}{
 		"addr": s.addr,
@@ -121,6 +122,79 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(status)
+}
+
+// handleBrowse lists directories for browsing
+func (s *Server) handleBrowse(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	path := r.URL.Query().Get("path")
+	if path == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			http.Error(w, "Failed to get home directory", http.StatusInternalServerError)
+			return
+		}
+		path = home
+	}
+
+	// Expand ~ to home directory
+	if path == "~" || filepath.HasPrefix(path, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			http.Error(w, "Failed to get home directory", http.StatusInternalServerError)
+			return
+		}
+		if path == "~" {
+			path = home
+		} else {
+			path = filepath.Join(home, path[2:])
+		}
+	}
+
+	// Clean the path
+	path = filepath.Clean(path)
+
+	// Read directory contents
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to read directory: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	// Filter to only directories
+	var dirs []map[string]interface{}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			// Skip hidden directories (starting with .)
+			if entry.Name()[0] == '.' {
+				continue
+			}
+
+			dirs = append(dirs, map[string]interface{}{
+				"name": entry.Name(),
+				"path": filepath.Join(path, entry.Name()),
+			})
+		}
+	}
+
+	// Get parent directory
+	parent := filepath.Dir(path)
+	if parent == path {
+		parent = "" // At root
+	}
+
+	response := map[string]interface{}{
+		"current": path,
+		"parent":  parent,
+		"dirs":    dirs,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 // GetConfigPath returns the config file path
