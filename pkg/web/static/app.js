@@ -449,6 +449,32 @@ function setWorkspace(type, path) {
     }
 }
 
+// Browse for workspace directory
+function browseWorkspace(type) {
+    const currentPath = type === 'agent'
+        ? document.getElementById('agent-workspace').value
+        : document.getElementById('default-workspace').value;
+
+    const path = prompt(
+        'Enter workspace directory path:\n\n' +
+        'Common paths:\n' +
+        '  ~/Documents\n' +
+        '  ~/Desktop\n' +
+        '  ~/Downloads\n' +
+        '  ~/projects\n' +
+        '  ~/projects/v16\n' +
+        '  ~/.v16/workspace\n\n' +
+        'You can use:\n' +
+        '  ~ for home directory\n' +
+        '  Absolute paths like /Users/username/folder',
+        currentPath || '~/'
+    );
+
+    if (path !== null && path.trim() !== '') {
+        setWorkspace(type, path.trim());
+    }
+}
+
 // Load initial data
 window.addEventListener('DOMContentLoaded', () => {
     loadConfig();

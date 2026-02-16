@@ -439,6 +439,30 @@
             box-shadow: none;
         }
 
+        .browse-btn {
+            padding: 8px 16px;
+            background: #8B7355;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .browse-btn:hover {
+            background: #A67C52;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(139, 115, 85, 0.4);
+        }
+
+        .browse-btn:active {
+            transform: translateY(0);
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -794,7 +818,10 @@
                 <div class="form-group">
                     <label>Workspace Path</label>
                     <div class="workspace-input-group">
-                        <input type="text" id="default-workspace" placeholder="~/.v16/workspace">
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="default-workspace" placeholder="~/.v16/workspace" style="flex: 1;">
+                            <button type="button" class="browse-btn" onclick="browseWorkspace('default')" title="Browse for folder">📁 Browse</button>
+                        </div>
                         <div class="workspace-presets">
                             <button type="button" class="preset-btn" onclick="setWorkspace('default', '~/.v16/workspace')">Default</button>
                             <button type="button" class="preset-btn" onclick="setWorkspace('default', '~/Documents')">Documents</button>
@@ -878,7 +905,10 @@
                 <div class="form-group">
                     <label>Workspace Path</label>
                     <div class="workspace-input-group">
-                        <input type="text" id="agent-workspace" placeholder="~/.v16/workspace">
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="agent-workspace" placeholder="~/.v16/workspace" style="flex: 1;">
+                            <button type="button" class="browse-btn" onclick="browseWorkspace('agent')" title="Browse for folder">📁 Browse</button>
+                        </div>
                         <div class="workspace-presets">
                             <button type="button" class="preset-btn" onclick="setWorkspace('agent', '~/.v16/workspace')">Default</button>
                             <button type="button" class="preset-btn" onclick="setWorkspace('agent', '~/Documents')">Documents</button>
