@@ -257,6 +257,223 @@ All 21 tools are automatically available to the LLM during conversations!
 - Automated maintenance
 - Alert handling
 
+## 🤖 Autonomous Agents (24/7 Monitoring & Automation)
+
+V16 Client supports **autonomous agents** - AI agents that run on scheduled intervals (cron) to monitor systems, analyze data, and send reports automatically. No human intervention needed!
+
+**📺 [Watch Demo: 24/7 AWS Log Monitoring Agent](https://youtu.be/7Q7MuoR7iaE)**
+
+### Real-World Example: AWS Log Monitoring Agent
+
+This autonomous agent monitors your AWS ECS logs every hour, analyzes errors, and sends detailed health reports to Telegram:
+
+```json
+{
+  "agents": {
+    "defaults": {
+      "workspace": "~/.v16/workspace",
+      "restrict_to_workspace": false,
+      "provider": "moonshot",
+      "model": "moonshot-v1-128k",
+      "max_tokens": 8192,
+      "temperature": 0.3,
+      "max_tool_iterations": 20
+    },
+    "list": [
+      {
+        "id": "agent-logs-1",
+        "name": "AWSLogMonitor",
+        "personality": "You are a senior DevOps engineer analyzing AWS ECS logs. Parse ALL log events to extract: API endpoints, HTTP status code distribution, response times, error patterns. Provide INSIGHTS: identify trends (errors increasing?), anomalies (sudden spikes?), performance degradation, which endpoints failing. Show actual error messages with timestamps. Give actionable recommendations. Use exec tool with --profile production. Be specific, not generic.",
+        "provider": "moonshot",
+        "model": "moonshot-v1-128k",
+        "max_tokens": 8192,
+        "temperature": 0.3,
+        "workspace": "~/.v16/workspace",
+        "restrict_to_workspace": false,
+        "enabled": true,
+        "telegram_chat_id": "YOUR_TELEGRAM_CHAT_ID",
+        "cron_jobs": [
+          {
+            "schedule": "0 0 * * * *",
+            "task": "1) Execute: aws logs filter-log-events --log-group-name /ecs/your-api-service --start-time $(($(date +%s) - 3600))000 --profile production 2) Analyze the JSON output 3) Send message to Telegram with: total requests, success/error rates, top errors with snippets, performance insights, recommendations"
+          }
+        ]
+      }
+    ]
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "token": "YOUR_BOT_TOKEN"
+    }
+  },
+  "providers": {
+    "moonshot": {
+      "api_key": "sk-...",
+      "api_base": "https://api.moonshot.ai/v1"
+    }
+  }
+}
+```
+
+### What This Agent Does
+
+**Every Hour (automatically):**
+1. ✅ Fetches last hour of AWS CloudWatch logs using AWS CLI
+2. ✅ Parses JSON output to extract metrics
+3. ✅ Analyzes HTTP status codes (200, 404, 500, etc.)
+4. ✅ Identifies error patterns and trends
+5. ✅ Calculates success/error rates and performance metrics
+6. ✅ Sends comprehensive health report to Telegram
+
+**Example Report Sent to Telegram:**
+```
+After analyzing the AWS ECS logs, here are the key insights:
+
+1. Total Requests: 1,247
+2. Success/Error Rates:
+   - Success Rate: 94.3% (1,176 out of 1,247 requests)
+   - Error Rate: 5.7% (71 out of 1,247 requests)
+
+3. Top Errors with Snippets:
+   - Error 404: 45 occurrences
+     - Timestamp: 2026-02-15T14:23:12Z
+     - Message: "GET /api/items/123 404 45ms"
+
+   - Error 500: 18 occurrences
+     - Timestamp: 2026-02-15T14:45:33Z
+     - Message: "POST /api/users 500 234ms - Database connection timeout"
+
+   - Error 503: 8 occurrences
+     - Timestamp: 2026-02-15T15:12:08Z
+     - Message: "GET /api/orders 503 1205ms - Service unavailable"
+
+4. Performance Insights:
+   - Average Response Time: 187ms
+   - 95th Percentile: 421ms
+   - Slowest Endpoint: /api/analytics (avg 1.2s)
+
+5. Recommendations:
+   - 🔴 CRITICAL: Investigate database connection timeouts on /api/users endpoint
+   - 🟡 WARNING: /api/items/123 shows high 404 rate - check if resource exists
+   - 🟢 OPTIMIZE: /api/analytics response time degrading - consider caching
+```
+
+### Cron Schedule Format
+
+The schedule uses 6 fields (includes seconds):
+```
+┌─────────── second (0-59)
+│ ┌─────────── minute (0-59)
+│ │ ┌─────────── hour (0-23)
+│ │ │ ┌─────────── day of month (1-31)
+│ │ │ │ ┌─────────── month (1-12)
+│ │ │ │ │ ┌─────────── day of week (0-6, Sunday=0)
+│ │ │ │ │ │
+│ │ │ │ │ │
+0 0 * * * *  ← Run every hour (at :00)
+0 */30 * * * *  ← Run every 30 minutes
+0 0 */6 * * *  ← Run every 6 hours
+0 0 9 * * *  ← Run daily at 9:00 AM
+0 0 0 * * 1  ← Run every Monday at midnight
+```
+
+### More Autonomous Agent Ideas
+
+**Security Monitoring**
+```json
+{
+  "name": "SecurityMonitor",
+  "personality": "You are a security analyst. Monitor system logs for suspicious activity, failed login attempts, unusual network traffic. Alert on potential security threats.",
+  "cron_jobs": [{
+    "schedule": "0 */15 * * * *",
+    "task": "Check /var/log/auth.log for failed SSH attempts in last 15 mins. Send alert if >5 failures from same IP."
+  }]
+}
+```
+
+**Database Health Check**
+```json
+{
+  "name": "DatabaseMonitor",
+  "personality": "You are a DBA. Monitor database performance metrics, slow queries, connection pool usage, and disk space.",
+  "cron_jobs": [{
+    "schedule": "0 */5 * * * *",
+    "task": "Execute: SELECT COUNT(*) FROM pg_stat_activity; Check slow queries. Report if connections >80% or queries >1s."
+  }]
+}
+```
+
+**API Uptime Monitor**
+```json
+{
+  "name": "UptimeMonitor",
+  "personality": "You are a reliability engineer. Test API endpoints for availability and response times.",
+  "cron_jobs": [{
+    "schedule": "0 */10 * * * *",
+    "task": "Curl production endpoints. Check status codes and response times. Alert if any endpoint fails or >500ms response."
+  }]
+}
+```
+
+**Disk Space Monitor**
+```json
+{
+  "name": "DiskSpaceMonitor",
+  "personality": "You are a system administrator. Monitor disk usage across all mounted filesystems.",
+  "cron_jobs": [{
+    "schedule": "0 0 */4 * * *",
+    "task": "Run: df -h. Check all partitions. Alert if any partition >85% full with cleanup recommendations."
+  }]
+}
+```
+
+### Interactive Intelligence
+
+When you message the agent on Telegram, it intelligently responds to your questions:
+
+**You:** "what are those 500 errors?"
+**Agent:** *[Immediately queries AWS logs with filter for 500 errors]*
+```
+Found 18 instances of 500 errors in the last hour:
+
+1. Timestamp: 2026-02-15T14:45:33Z
+   Endpoint: POST /api/users
+   Error: "Database connection timeout after 5000ms"
+
+2. Timestamp: 2026-02-15T14:47:12Z
+   Endpoint: POST /api/users
+   Error: "Database connection timeout after 5000ms"
+
+Root Cause: Database connection pool exhausted
+Recommendation: Increase pool size or optimize slow queries
+```
+
+**You:** "look into logs"
+**Agent:** *[Analyzes recent logs and provides detailed breakdown]*
+
+The agent proactively investigates issues using real AWS CLI commands, not generic explanations!
+
+### Key Features
+
+- ✅ **24/7 Monitoring**: Runs autonomously on schedule
+- ✅ **Smart Analysis**: Uses AI to extract insights from logs
+- ✅ **Multi-Channel**: Send reports to Telegram, Slack, Discord
+- ✅ **AWS Integration**: Full AWS CLI access with profile support
+- ✅ **Interactive**: Ask follow-up questions, get real-time analysis
+- ✅ **Actionable**: Provides specific recommendations, not just alerts
+- ✅ **Persistent**: Auto-corrects errors, retries failed commands
+
+### Getting Started
+
+1. **Configure Telegram bot** (see Quick Start)
+2. **Add autonomous agent** to `~/.v16/config.json`
+3. **Set up AWS credentials** (if monitoring AWS)
+4. **Start gateway**: `v16 gateway`
+5. **Check Telegram** for hourly reports!
+
+The agent runs in the background, continuously monitoring your systems and sending insights when it detects issues.
+
 ## 🏗️ Architecture
 
 ### Standalone Mode
