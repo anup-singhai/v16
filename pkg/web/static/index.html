@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V16 Agent Configuration</title>
+    <title>V16 Agent Control Panel</title>
     <style>
         * {
             margin: 0;
@@ -19,23 +19,27 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
 
+        /* Header */
         header {
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
             padding: 30px;
             border-radius: 12px;
             margin-bottom: 30px;
             border: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        h1 {
+        .logo-section h1 {
             color: #8B7355;
             font-size: 2rem;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
@@ -45,6 +49,12 @@
             font-size: 0.9rem;
         }
 
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Tabs */
         .tabs {
             display: flex;
             gap: 10px;
@@ -75,18 +85,257 @@
 
         .tab-content {
             display: none;
-            background: #1a1a1a;
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid #333;
         }
 
         .tab-content.active {
             display: block;
         }
 
+        /* Buttons */
+        button, .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #8B7355 0%, #A67C52 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover, .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 115, 85, 0.3);
+        }
+
+        button.secondary, .btn.secondary {
+            background: transparent;
+            border: 1px solid #8B7355;
+            color: #8B7355;
+        }
+
+        button.secondary:hover, .btn.secondary:hover {
+            background: rgba(139, 115, 85, 0.1);
+        }
+
+        button.danger {
+            background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+        }
+
+        button.small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        /* Agent Cards */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .agent-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .agent-card:hover {
+            border-color: #8B7355;
+            transform: translateY(-2px);
+        }
+
+        .agent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .agent-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #8B7355;
+        }
+
+        .agent-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .agent-status.active {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .agent-status.inactive {
+            background: rgba(158, 158, 158, 0.2);
+            color: #9e9e9e;
+        }
+
+        .agent-description {
+            color: #999;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .agent-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .agent-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .agent-detail:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .detail-value {
+            color: #e0e0e0;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .agent-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        /* Add Agent Card */
+        .add-agent-card {
+            background: rgba(139, 115, 85, 0.1);
+            border: 2px dashed #8B7355;
+            border-radius: 12px;
+            padding: 60px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .add-agent-card:hover {
+            background: rgba(139, 115, 85, 0.15);
+            border-color: #A67C52;
+        }
+
+        .add-icon {
+            font-size: 3rem;
+            color: #8B7355;
+            margin-bottom: 16px;
+        }
+
+        .add-text {
+            color: #8B7355;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #8B7355;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #e0e0e0;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 24px;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Forms */
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         label {
@@ -122,7 +371,13 @@
 
         textarea {
             min-height: 100px;
-            font-family: 'Monaco', 'Courier New', monospace;
+            font-family: inherit;
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
         }
 
         .checkbox-group {
@@ -137,46 +392,29 @@
             cursor: pointer;
         }
 
-        .button-group {
+        .checkbox-label {
             display: flex;
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        button {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #8B7355 0%, #A67C52 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
+            align-items: center;
+            gap: 10px;
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            color: #e0e0e0;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(139, 115, 85, 0.3);
-        }
-
-        button.secondary {
-            background: transparent;
-            border: 1px solid #8B7355;
+        .checkbox-label:hover {
             color: #8B7355;
         }
 
-        button.secondary:hover {
-            background: rgba(139, 115, 85, 0.1);
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
         }
 
+        /* Status Cards */
         .status-card {
             background: #1a1a1a;
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
             border: 1px solid #333;
         }
 
@@ -218,6 +456,7 @@
             background: #666;
         }
 
+        /* Messages */
         .message {
             padding: 15px;
             border-radius: 6px;
@@ -237,269 +476,383 @@
             color: #f44336;
         }
 
-        .grid {
+        /* Provider Grid */
+        .provider-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
         }
 
-        .help-text {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 5px;
+        .provider-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
         }
 
+        .provider-card h3 {
+            color: #8B7355;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
+            .agents-grid {
+                grid-template-columns: 1fr;
+            }
+
             .grid {
                 grid-template-columns: 1fr;
             }
 
-            .button-group {
+            .header-actions {
                 flex-direction: column;
             }
 
-            button {
-                width: 100%;
+            header {
+                flex-direction: column;
+                align-items: flex-start;
             }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-state-subtext {
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
+        /* Cron Jobs */
+        .cron-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .cron-item {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cron-schedule {
+            color: #8B7355;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .cron-task {
+            color: #999;
+            font-size: 0.85rem;
+            flex: 1;
+            margin: 0 12px;
+        }
+
+        .add-cron-btn {
+            background: rgba(139, 115, 85, 0.1);
+            border: 1px dashed #8B7355;
+            color: #8B7355;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .add-cron-btn:hover {
+            background: rgba(139, 115, 85, 0.2);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🤖 V16 Agent Configuration</h1>
-            <p class="subtitle">Configure your autonomous AI agents</p>
+            <div class="logo-section">
+                <h1>🤖 V16 Control Panel</h1>
+                <p class="subtitle">Manage your autonomous AI agent team</p>
+            </div>
+            <div class="header-actions">
+                <button onclick="loadStatus()" class="secondary small">Refresh</button>
+                <button onclick="saveGlobalConfig()" class="small">Save All</button>
+            </div>
         </header>
 
         <div id="message" class="message"></div>
 
         <div class="tabs">
-            <button class="tab active" data-tab="status">Status</button>
-            <button class="tab" data-tab="agents">Agents</button>
+            <button class="tab active" data-tab="agents">My Agents</button>
             <button class="tab" data-tab="channels">Channels</button>
             <button class="tab" data-tab="providers">Providers</button>
-        </div>
-
-        <!-- Status Tab -->
-        <div id="status-tab" class="tab-content active">
-            <h2 style="color: #8B7355; margin-bottom: 20px;">System Status</h2>
-            <div class="status-card">
-                <div class="status-row">
-                    <span class="status-label">Config Path</span>
-                    <span class="status-value" id="status-config-path">-</span>
-                </div>
-                <div class="status-row">
-                    <span class="status-label">Workspace</span>
-                    <span class="status-value" id="status-workspace">-</span>
-                </div>
-                <div class="status-row">
-                    <span class="status-label">Provider</span>
-                    <span class="status-value" id="status-provider">-</span>
-                </div>
-                <div class="status-row">
-                    <span class="status-label">Model</span>
-                    <span class="status-value" id="status-model">-</span>
-                </div>
-            </div>
-
-            <h3 style="color: #8B7355; margin: 30px 0 20px 0;">Channels</h3>
-            <div class="status-card">
-                <div class="status-row">
-                    <span class="status-label">Telegram</span>
-                    <span class="status-value" id="status-telegram">
-                        <span class="status-indicator disabled"></span> Disabled
-                    </span>
-                </div>
-                <div class="status-row">
-                    <span class="status-label">Discord</span>
-                    <span class="status-value" id="status-discord">
-                        <span class="status-indicator disabled"></span> Disabled
-                    </span>
-                </div>
-                <div class="status-row">
-                    <span class="status-label">Slack</span>
-                    <span class="status-value" id="status-slack">
-                        <span class="status-indicator disabled"></span> Disabled
-                    </span>
-                </div>
-            </div>
-
-            <div class="button-group">
-                <button onclick="loadStatus()">Refresh Status</button>
-            </div>
+            <button class="tab" data-tab="settings">Settings</button>
         </div>
 
         <!-- Agents Tab -->
-        <div id="agents-tab" class="tab-content">
-            <h2 style="color: #8B7355; margin-bottom: 20px;">Agent Configuration</h2>
-
-            <div class="form-group">
-                <label>Workspace Path</label>
-                <input type="text" id="agent-workspace" placeholder="~/workspace">
-                <p class="help-text">Directory where agent files are stored</p>
-            </div>
-
-            <div class="form-group">
-                <label>Provider</label>
-                <select id="agent-provider">
-                    <option value="anthropic">Anthropic</option>
-                    <option value="openai">OpenAI</option>
-                    <option value="openrouter">OpenRouter</option>
-                    <option value="moonshot">Moonshot AI (Kimi)</option>
-                    <option value="deepseek">DeepSeek</option>
-                    <option value="groq">Groq</option>
-                    <option value="gemini">Google Gemini</option>
-                    <option value="zhipu">Zhipu (GLM)</option>
-                    <option value="nvidia">Nvidia</option>
-                    <option value="github_copilot">GitHub Copilot</option>
-                    <option value="vllm">vLLM (Local)</option>
-                    <option value="shengsuanyun">ShengSuanYun</option>
-                </select>
-            </div>
-
-            <div class="grid">
-                <div class="form-group">
-                    <label>Model</label>
-                    <input type="text" id="agent-model" placeholder="anthropic/claude-3-5-sonnet">
-                </div>
-
-                <div class="form-group">
-                    <label>Max Tokens</label>
-                    <input type="number" id="agent-max-tokens" placeholder="4096">
-                </div>
-            </div>
-
-            <div class="grid">
-                <div class="form-group">
-                    <label>Temperature</label>
-                    <input type="number" id="agent-temperature" step="0.1" min="0" max="2" placeholder="0.7">
-                </div>
-
-                <div class="form-group">
-                    <label>Max Tool Iterations</label>
-                    <input type="number" id="agent-max-iterations" placeholder="50">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="agent-restrict">
-                    <label style="margin: 0;">Restrict to Workspace</label>
-                </div>
-                <p class="help-text">Prevent agent from accessing files outside workspace</p>
+        <div id="agents-tab" class="tab-content active">
+            <div class="agents-grid" id="agents-grid">
+                <!-- Agent cards will be dynamically inserted here -->
             </div>
         </div>
 
         <!-- Channels Tab -->
         <div id="channels-tab" class="tab-content">
-            <h2 style="color: #8B7355; margin-bottom: 20px;">Channel Configuration</h2>
+            <h2 style="color: #8B7355; margin-bottom: 20px;">Communication Channels</h2>
 
-            <h3 style="color: #A67C52; margin: 20px 0;">Telegram</h3>
-            <div class="form-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="telegram-enabled">
-                    <label style="margin: 0;">Enable Telegram</label>
+            <div class="provider-grid">
+                <div class="provider-card">
+                    <h3>Telegram</h3>
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="telegram-enabled">
+                            <label style="margin: 0;">Enabled</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Bot Token</label>
+                        <input type="text" id="telegram-token" placeholder="123456:ABC-DEF...">
+                        <p class="help-text">Get from @BotFather</p>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Bot Token</label>
-                <input type="text" id="telegram-token" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11">
-                <p class="help-text">Get token from @BotFather on Telegram</p>
-            </div>
 
-            <h3 style="color: #A67C52; margin: 30px 0 20px 0;">Discord</h3>
-            <div class="form-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="discord-enabled">
-                    <label style="margin: 0;">Enable Discord</label>
+                <div class="provider-card">
+                    <h3>Discord</h3>
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="discord-enabled">
+                            <label style="margin: 0;">Enabled</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Bot Token</label>
+                        <input type="text" id="discord-token" placeholder="Your Discord token">
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Bot Token</label>
-                <input type="text" id="discord-token" placeholder="Your Discord bot token">
-            </div>
 
-            <h3 style="color: #A67C52; margin: 30px 0 20px 0;">Slack</h3>
-            <div class="form-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="slack-enabled">
-                    <label style="margin: 0;">Enable Slack</label>
+                <div class="provider-card">
+                    <h3>Slack</h3>
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="slack-enabled">
+                            <label style="margin: 0;">Enabled</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Bot Token</label>
+                        <input type="text" id="slack-token" placeholder="xoxb-your-token">
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Bot Token</label>
-                <input type="text" id="slack-token" placeholder="xoxb-your-token">
             </div>
         </div>
 
         <!-- Providers Tab -->
         <div id="providers-tab" class="tab-content">
-            <h2 style="color: #8B7355; margin-bottom: 20px;">Provider API Keys</h2>
+            <h2 style="color: #8B7355; margin-bottom: 20px;">LLM Provider API Keys</h2>
 
-            <div class="form-group">
-                <label>Anthropic API Key</label>
-                <input type="text" id="provider-anthropic" placeholder="sk-ant-...">
-                <p class="help-text">Claude models from https://console.anthropic.com</p>
-            </div>
+            <div class="provider-grid">
+                <div class="provider-card">
+                    <h3>Anthropic</h3>
+                    <div class="form-group">
+                        <input type="text" id="provider-anthropic" placeholder="sk-ant-...">
+                        <p class="help-text">Claude models</p>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label>OpenAI API Key</label>
-                <input type="text" id="provider-openai" placeholder="sk-...">
-                <p class="help-text">GPT models from https://platform.openai.com</p>
-            </div>
+                <div class="provider-card">
+                    <h3>OpenAI</h3>
+                    <div class="form-group">
+                        <input type="text" id="provider-openai" placeholder="sk-...">
+                        <p class="help-text">GPT models</p>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label>OpenRouter API Key</label>
-                <input type="text" id="provider-openrouter" placeholder="sk-or-v1-...">
-                <p class="help-text">Access 100+ models from https://openrouter.ai/keys</p>
-            </div>
+                <div class="provider-card">
+                    <h3>Moonshot AI</h3>
+                    <div class="form-group">
+                        <input type="text" id="provider-moonshot" placeholder="sk-...">
+                        <p class="help-text">Kimi models</p>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label>Moonshot AI API Key</label>
-                <input type="text" id="provider-moonshot" placeholder="sk-...">
-                <p class="help-text">Kimi models from https://platform.moonshot.cn</p>
-            </div>
+                <div class="provider-card">
+                    <h3>DeepSeek</h3>
+                    <div class="form-group">
+                        <input type="text" id="provider-deepseek" placeholder="sk-...">
+                        <p class="help-text">DeepSeek models</p>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label>DeepSeek API Key</label>
-                <input type="text" id="provider-deepseek" placeholder="sk-...">
-                <p class="help-text">From https://platform.deepseek.com</p>
-            </div>
+                <div class="provider-card">
+                    <h3>Groq</h3>
+                    <div class="form-group">
+                        <input type="text" id="provider-groq" placeholder="gsk_...">
+                        <p class="help-text">Fast inference</p>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label>Groq API Key</label>
-                <input type="text" id="provider-groq" placeholder="gsk_...">
-                <p class="help-text">Fast inference from https://console.groq.com</p>
-            </div>
+                <div class="provider-card">
+                    <h3>Google Gemini</h3>
+                    <div class="form-group">
+                        <input type="text" id="provider-gemini" placeholder="AIza...">
+                        <p class="help-text">Gemini models</p>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label>Google Gemini API Key</label>
-                <input type="text" id="provider-gemini" placeholder="AIza...">
-                <p class="help-text">From https://aistudio.google.com/apikey</p>
-            </div>
+                <div class="provider-card">
+                    <h3>OpenRouter</h3>
+                    <div class="form-group">
+                        <input type="text" id="provider-openrouter" placeholder="sk-or-v1-...">
+                        <p class="help-text">100+ models</p>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label>Zhipu API Key</label>
-                <input type="text" id="provider-zhipu" placeholder="...">
-                <p class="help-text">GLM models from https://open.bigmodel.cn</p>
-            </div>
-
-            <div class="form-group">
-                <label>Nvidia API Key</label>
-                <input type="text" id="provider-nvidia" placeholder="nvapi-...">
-                <p class="help-text">From https://build.nvidia.com</p>
-            </div>
-
-            <div class="form-group">
-                <label>vLLM API Base URL</label>
-                <input type="text" id="provider-vllm" placeholder="http://localhost:8000">
-                <p class="help-text">Local vLLM or Ollama server URL</p>
+                <div class="provider-card">
+                    <h3>vLLM (Local)</h3>
+                    <div class="form-group">
+                        <input type="text" id="provider-vllm" placeholder="http://localhost:8000">
+                        <p class="help-text">Local server URL</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="button-group">
-            <button onclick="saveConfig()">Save Configuration</button>
-            <button class="secondary" onclick="loadConfig()">Reset Changes</button>
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <h2 style="color: #8B7355; margin-bottom: 20px;">Global Settings</h2>
+
+            <div class="status-card">
+                <div class="status-row">
+                    <span class="status-label">Config Path</span>
+                    <span class="status-value" id="status-config-path">~/.v16/config.json</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Workspace</span>
+                    <span class="status-value" id="status-workspace">~/.v16/workspace</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Gateway Host</span>
+                    <span class="status-value">0.0.0.0:18790</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3 style="color: #A67C52; margin-bottom: 15px;">Default Agent Settings</h3>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Workspace Path</label>
+                        <input type="text" id="default-workspace" placeholder="~/.v16/workspace">
+                        <p class="help-text">Default working directory for agents</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Max Tool Iterations</label>
+                        <input type="number" id="default-max-iterations" placeholder="50">
+                        <p class="help-text">Maximum number of tool calls per agent task</p>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="default-restrict-workspace">
+                        <span>Restrict agents to workspace directory</span>
+                    </label>
+                    <p class="help-text">When enabled, agents can only access files within the workspace path (security feature)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Modal -->
+    <div id="agent-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Create New Agent</h2>
+                <button class="modal-close" onclick="closeAgentModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="agent-id">
+
+                <div class="form-group">
+                    <label>Agent Name</label>
+                    <input type="text" id="agent-name" placeholder="devops">
+                    <p class="help-text">Use lowercase, no spaces (e.g., devops, research, monitor)</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Personality / Role</label>
+                    <textarea id="agent-personality" placeholder="You are a DevOps agent. You monitor git repos, handle deployments, and manage infrastructure. Be concise and technical."></textarea>
+                    <p class="help-text">Describe what this agent does and how it should behave</p>
+                </div>
+
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Provider</label>
+                        <select id="agent-provider">
+                            <option value="anthropic">Anthropic</option>
+                            <option value="openai">OpenAI</option>
+                            <option value="moonshot">Moonshot AI</option>
+                            <option value="deepseek">DeepSeek</option>
+                            <option value="groq">Groq</option>
+                            <option value="gemini">Google Gemini</option>
+                            <option value="openrouter">OpenRouter</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Model</label>
+                        <input type="text" id="agent-model" placeholder="claude-3-5-sonnet-20241022">
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Max Tokens</label>
+                        <input type="number" id="agent-max-tokens" placeholder="4096">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Temperature</label>
+                        <input type="number" id="agent-temperature" step="0.1" min="0" max="2" placeholder="0.7">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Cron Jobs (Autonomous Behaviors)</label>
+                    <div class="cron-list" id="cron-list">
+                        <!-- Cron jobs will be added here -->
+                    </div>
+                    <div class="add-cron-btn" onclick="addCronJob()">+ Add Scheduled Task</div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="agent-enabled" checked>
+                        <label style="margin: 0;">Agent Enabled</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary" onclick="closeAgentModal()">Cancel</button>
+                <button id="delete-agent-btn" class="danger" onclick="deleteAgent()" style="display: none;">Delete Agent</button>
+                <button onclick="saveAgent()">Save Agent</button>
+            </div>
         </div>
     </div>
 

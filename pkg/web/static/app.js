@@ -1,21 +1,20 @@
+// Global state
+let currentConfig = {};
+let agents = [];
+let cronJobs = [];
+
 // Tab switching
 document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
         const tabName = tab.dataset.tab;
-
-        // Update active tab
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-
-        // Update active content
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
         document.getElementById(`${tabName}-tab`).classList.add('active');
     });
 });
-
-let currentConfig = {};
 
 // Load configuration
 async function loadConfig() {
@@ -24,7 +23,30 @@ async function loadConfig() {
         if (!response.ok) throw new Error('Failed to load config');
 
         currentConfig = await response.json();
+
+        // Extract agents from config (current single agent becomes default)
+        agents = [];
+
+        // Check if multi-agent config exists
+        if (currentConfig.agents && currentConfig.agents.list) {
+            agents = currentConfig.agents.list;
+        } else {
+            // Migrate from single agent to multi-agent
+            agents = [{
+                id: 'default',
+                name: 'assistant',
+                personality: 'You are a helpful AI assistant.',
+                provider: currentConfig.agents?.defaults?.provider || 'moonshot',
+                model: currentConfig.agents?.defaults?.model || 'moonshot-v1-128k',
+                max_tokens: currentConfig.agents?.defaults?.max_tokens || 4096,
+                temperature: currentConfig.agents?.defaults?.temperature || 0.7,
+                enabled: true,
+                cron_jobs: []
+            }];
+        }
+
         populateForm(currentConfig);
+        renderAgents();
         showMessage('Configuration loaded', 'success');
     } catch (error) {
         showMessage('Error loading configuration: ' + error.message, 'error');
@@ -40,13 +62,6 @@ async function loadStatus() {
         const status = await response.json();
         document.getElementById('status-config-path').textContent = status.config_path || '-';
         document.getElementById('status-workspace').textContent = status.workspace || '-';
-        document.getElementById('status-provider').textContent = status.provider || '-';
-        document.getElementById('status-model').textContent = status.model || '-';
-
-        // Update channel status
-        updateChannelStatus('telegram', status.channels?.telegram);
-        updateChannelStatus('discord', status.channels?.discord);
-        updateChannelStatus('slack', status.channels?.slack);
 
         showMessage('Status refreshed', 'success');
     } catch (error) {
@@ -54,30 +69,231 @@ async function loadStatus() {
     }
 }
 
-function updateChannelStatus(channel, enabled) {
-    const element = document.getElementById(`status-${channel}`);
-    const indicator = element.querySelector('.status-indicator');
+// Render agents grid
+function renderAgents() {
+    const grid = document.getElementById('agents-grid');
+    grid.innerHTML = '';
 
-    if (enabled) {
-        indicator.className = 'status-indicator enabled';
-        element.innerHTML = `<span class="status-indicator enabled"></span> Enabled`;
-    } else {
-        indicator.className = 'status-indicator disabled';
-        element.innerHTML = `<span class="status-indicator disabled"></span> Disabled`;
+    if (agents.length === 0) {
+        grid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <div class="empty-state-icon">🤖</div>
+                <div class="empty-state-text">No Agents Yet</div>
+                <div class="empty-state-subtext">Create your first autonomous AI agent to get started</div>
+                <button onclick="openAgentModal()">Create First Agent</button>
+            </div>
+        `;
+        return;
     }
+
+    // Render agent cards
+    agents.forEach(agent => {
+        const card = document.createElement('div');
+        card.className = 'agent-card';
+
+        const statusClass = agent.enabled ? 'active' : 'inactive';
+        const statusText = agent.enabled ? 'Active' : 'Inactive';
+
+        const cronCount = agent.cron_jobs ? agent.cron_jobs.length : 0;
+        const cronText = cronCount === 1 ? '1 scheduled task' : `${cronCount} scheduled tasks`;
+
+        card.innerHTML = `
+            <div class="agent-header">
+                <div class="agent-name">@${agent.name}</div>
+                <div class="agent-status ${statusClass}">${statusText}</div>
+            </div>
+            <div class="agent-description">${agent.personality || 'No description'}</div>
+            <div class="agent-details">
+                <div class="agent-detail">
+                    <span class="detail-label">Provider</span>
+                    <span class="detail-value">${agent.provider}</span>
+                </div>
+                <div class="agent-detail">
+                    <span class="detail-label">Model</span>
+                    <span class="detail-value">${agent.model}</span>
+                </div>
+                <div class="agent-detail">
+                    <span class="detail-label">Autonomous Tasks</span>
+                    <span class="detail-value">${cronText}</span>
+                </div>
+            </div>
+            <div class="agent-actions">
+                <button class="small secondary" onclick="editAgent('${agent.id}')">Edit</button>
+                <button class="small secondary" onclick="toggleAgent('${agent.id}')">${agent.enabled ? 'Disable' : 'Enable'}</button>
+            </div>
+        `;
+
+        grid.appendChild(card);
+    });
+
+    // Add "Create Agent" card
+    const addCard = document.createElement('div');
+    addCard.className = 'add-agent-card';
+    addCard.onclick = () => openAgentModal();
+    addCard.innerHTML = `
+        <div class="add-icon">+</div>
+        <div class="add-text">Create New Agent</div>
+    `;
+    grid.appendChild(addCard);
+}
+
+// Open agent modal (create or edit)
+function openAgentModal(agentId = null) {
+    const modal = document.getElementById('agent-modal');
+    const title = document.getElementById('modal-title');
+    const deleteBtn = document.getElementById('delete-agent-btn');
+
+    // Clear form
+    document.getElementById('agent-id').value = '';
+    document.getElementById('agent-name').value = '';
+    document.getElementById('agent-personality').value = '';
+    document.getElementById('agent-provider').value = 'anthropic';
+    document.getElementById('agent-model').value = '';
+    document.getElementById('agent-max-tokens').value = '4096';
+    document.getElementById('agent-temperature').value = '0.7';
+    document.getElementById('agent-enabled').checked = true;
+    cronJobs = [];
+    renderCronJobs();
+
+    if (agentId) {
+        // Edit mode
+        const agent = agents.find(a => a.id === agentId);
+        if (agent) {
+            title.textContent = 'Edit Agent: @' + agent.name;
+            deleteBtn.style.display = 'inline-block';
+
+            document.getElementById('agent-id').value = agent.id;
+            document.getElementById('agent-name').value = agent.name;
+            document.getElementById('agent-personality').value = agent.personality || '';
+            document.getElementById('agent-provider').value = agent.provider;
+            document.getElementById('agent-model').value = agent.model;
+            document.getElementById('agent-max-tokens').value = agent.max_tokens || 4096;
+            document.getElementById('agent-temperature').value = agent.temperature || 0.7;
+            document.getElementById('agent-enabled').checked = agent.enabled !== false;
+            cronJobs = agent.cron_jobs || [];
+            renderCronJobs();
+        }
+    } else {
+        // Create mode
+        title.textContent = 'Create New Agent';
+        deleteBtn.style.display = 'none';
+    }
+
+    modal.classList.add('active');
+}
+
+function closeAgentModal() {
+    document.getElementById('agent-modal').classList.remove('active');
+}
+
+function editAgent(agentId) {
+    openAgentModal(agentId);
+}
+
+function toggleAgent(agentId) {
+    const agent = agents.find(a => a.id === agentId);
+    if (agent) {
+        agent.enabled = !agent.enabled;
+        renderAgents();
+        showMessage(`Agent @${agent.name} ${agent.enabled ? 'enabled' : 'disabled'}`, 'success');
+    }
+}
+
+function deleteAgent() {
+    const agentId = document.getElementById('agent-id').value;
+    if (!agentId) return;
+
+    if (!confirm('Are you sure you want to delete this agent?')) return;
+
+    agents = agents.filter(a => a.id !== agentId);
+    closeAgentModal();
+    renderAgents();
+    showMessage('Agent deleted', 'success');
+}
+
+function saveAgent() {
+    const agentId = document.getElementById('agent-id').value;
+    const name = document.getElementById('agent-name').value.trim();
+    const personality = document.getElementById('agent-personality').value.trim();
+    const provider = document.getElementById('agent-provider').value;
+    const model = document.getElementById('agent-model').value.trim();
+    const maxTokens = parseInt(document.getElementById('agent-max-tokens').value) || 4096;
+    const temperature = parseFloat(document.getElementById('agent-temperature').value) || 0.7;
+    const enabled = document.getElementById('agent-enabled').checked;
+
+    if (!name) {
+        showMessage('Agent name is required', 'error');
+        return;
+    }
+
+    if (!model) {
+        showMessage('Model is required', 'error');
+        return;
+    }
+
+    const agent = {
+        id: agentId || generateId(),
+        name: name,
+        personality: personality,
+        provider: provider,
+        model: model,
+        max_tokens: maxTokens,
+        temperature: temperature,
+        enabled: enabled,
+        cron_jobs: cronJobs
+    };
+
+    if (agentId) {
+        // Update existing
+        const index = agents.findIndex(a => a.id === agentId);
+        if (index !== -1) {
+            agents[index] = agent;
+        }
+    } else {
+        // Create new
+        agents.push(agent);
+    }
+
+    closeAgentModal();
+    renderAgents();
+    showMessage(`Agent @${agent.name} saved`, 'success');
+}
+
+// Cron job management
+function renderCronJobs() {
+    const list = document.getElementById('cron-list');
+    list.innerHTML = '';
+
+    cronJobs.forEach((job, index) => {
+        const item = document.createElement('div');
+        item.className = 'cron-item';
+        item.innerHTML = `
+            <div class="cron-schedule">${job.schedule}</div>
+            <div class="cron-task">${job.task}</div>
+            <button class="small danger" onclick="removeCronJob(${index})">×</button>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function addCronJob() {
+    const schedule = prompt('Enter cron schedule (e.g., "0 9 * * *" for 9am daily, or "*/30 * * * *" for every 30 min):');
+    if (!schedule) return;
+
+    const task = prompt('Enter task description:');
+    if (!task) return;
+
+    cronJobs.push({ schedule, task });
+    renderCronJobs();
+}
+
+function removeCronJob(index) {
+    cronJobs.splice(index, 1);
+    renderCronJobs();
 }
 
 // Populate form with config data
 function populateForm(config) {
-    // Agents
-    document.getElementById('agent-workspace').value = config.agents?.defaults?.workspace || '';
-    document.getElementById('agent-provider').value = config.agents?.defaults?.provider || 'openrouter';
-    document.getElementById('agent-model').value = config.agents?.defaults?.model || '';
-    document.getElementById('agent-max-tokens').value = config.agents?.defaults?.max_tokens || 4096;
-    document.getElementById('agent-temperature').value = config.agents?.defaults?.temperature || 0.7;
-    document.getElementById('agent-max-iterations').value = config.agents?.defaults?.max_tool_iterations || 50;
-    document.getElementById('agent-restrict').checked = config.agents?.defaults?.restrict_to_workspace || false;
-
     // Channels - Telegram
     document.getElementById('telegram-enabled').checked = config.channels?.telegram?.enabled || false;
     document.getElementById('telegram-token').value = config.channels?.telegram?.token || '';
@@ -98,82 +314,75 @@ function populateForm(config) {
     document.getElementById('provider-deepseek').value = config.providers?.deepseek?.api_key || '';
     document.getElementById('provider-groq').value = config.providers?.groq?.api_key || '';
     document.getElementById('provider-gemini').value = config.providers?.gemini?.api_key || '';
-    document.getElementById('provider-zhipu').value = config.providers?.zhipu?.api_key || '';
-    document.getElementById('provider-nvidia').value = config.providers?.nvidia?.api_key || '';
     document.getElementById('provider-vllm').value = config.providers?.vllm?.api_base || '';
+
+    // Settings
+    document.getElementById('default-workspace').value = config.agents?.defaults?.workspace || '';
+    document.getElementById('default-max-iterations').value = config.agents?.defaults?.max_tool_iterations || 50;
+    document.getElementById('default-restrict-workspace').checked = config.agents?.defaults?.restrict_to_workspace || false;
 }
 
-// Collect form data
-function collectFormData() {
-    const config = JSON.parse(JSON.stringify(currentConfig)); // Deep clone
-
-    // Agents
-    config.agents = config.agents || {};
-    config.agents.defaults = {
-        workspace: document.getElementById('agent-workspace').value,
-        restrict_to_workspace: document.getElementById('agent-restrict').checked,
-        provider: document.getElementById('agent-provider').value,
-        model: document.getElementById('agent-model').value,
-        max_tokens: parseInt(document.getElementById('agent-max-tokens').value) || 4096,
-        temperature: parseFloat(document.getElementById('agent-temperature').value) || 0.7,
-        max_tool_iterations: parseInt(document.getElementById('agent-max-iterations').value) || 50
-    };
-
-    // Channels
-    config.channels = config.channels || {};
-
-    config.channels.telegram = config.channels.telegram || {};
-    config.channels.telegram.enabled = document.getElementById('telegram-enabled').checked;
-    config.channels.telegram.token = document.getElementById('telegram-token').value;
-
-    config.channels.discord = config.channels.discord || {};
-    config.channels.discord.enabled = document.getElementById('discord-enabled').checked;
-    config.channels.discord.token = document.getElementById('discord-token').value;
-
-    config.channels.slack = config.channels.slack || {};
-    config.channels.slack.enabled = document.getElementById('slack-enabled').checked;
-    config.channels.slack.bot_token = document.getElementById('slack-token').value;
-
-    // Providers
-    config.providers = config.providers || {};
-
-    config.providers.anthropic = config.providers.anthropic || {};
-    config.providers.anthropic.api_key = document.getElementById('provider-anthropic').value;
-
-    config.providers.openai = config.providers.openai || {};
-    config.providers.openai.api_key = document.getElementById('provider-openai').value;
-
-    config.providers.openrouter = config.providers.openrouter || {};
-    config.providers.openrouter.api_key = document.getElementById('provider-openrouter').value;
-
-    config.providers.moonshot = config.providers.moonshot || {};
-    config.providers.moonshot.api_key = document.getElementById('provider-moonshot').value;
-
-    config.providers.deepseek = config.providers.deepseek || {};
-    config.providers.deepseek.api_key = document.getElementById('provider-deepseek').value;
-
-    config.providers.groq = config.providers.groq || {};
-    config.providers.groq.api_key = document.getElementById('provider-groq').value;
-
-    config.providers.gemini = config.providers.gemini || {};
-    config.providers.gemini.api_key = document.getElementById('provider-gemini').value;
-
-    config.providers.zhipu = config.providers.zhipu || {};
-    config.providers.zhipu.api_key = document.getElementById('provider-zhipu').value;
-
-    config.providers.nvidia = config.providers.nvidia || {};
-    config.providers.nvidia.api_key = document.getElementById('provider-nvidia').value;
-
-    config.providers.vllm = config.providers.vllm || {};
-    config.providers.vllm.api_base = document.getElementById('provider-vllm').value;
-
-    return config;
-}
-
-// Save configuration
-async function saveConfig() {
+// Collect form data and save
+async function saveGlobalConfig() {
     try {
-        const config = collectFormData();
+        const config = JSON.parse(JSON.stringify(currentConfig)); // Deep clone
+
+        // Agents - save multi-agent list
+        config.agents = config.agents || {};
+        config.agents.list = agents;
+
+        // Keep defaults for backward compatibility
+        config.agents.defaults = {
+            workspace: document.getElementById('default-workspace').value || currentConfig.agents?.defaults?.workspace,
+            restrict_to_workspace: document.getElementById('default-restrict-workspace').checked,
+            provider: agents.length > 0 ? agents[0].provider : 'moonshot',
+            model: agents.length > 0 ? agents[0].model : 'moonshot-v1-128k',
+            max_tokens: currentConfig.agents?.defaults?.max_tokens || 4096,
+            temperature: currentConfig.agents?.defaults?.temperature || 0.7,
+            max_tool_iterations: parseInt(document.getElementById('default-max-iterations').value) || 50
+        };
+
+        // Channels
+        config.channels = config.channels || {};
+
+        config.channels.telegram = config.channels.telegram || {};
+        config.channels.telegram.enabled = document.getElementById('telegram-enabled').checked;
+        config.channels.telegram.token = document.getElementById('telegram-token').value;
+
+        config.channels.discord = config.channels.discord || {};
+        config.channels.discord.enabled = document.getElementById('discord-enabled').checked;
+        config.channels.discord.token = document.getElementById('discord-token').value;
+
+        config.channels.slack = config.channels.slack || {};
+        config.channels.slack.enabled = document.getElementById('slack-enabled').checked;
+        config.channels.slack.bot_token = document.getElementById('slack-token').value;
+
+        // Providers
+        config.providers = config.providers || {};
+
+        config.providers.anthropic = config.providers.anthropic || {};
+        config.providers.anthropic.api_key = document.getElementById('provider-anthropic').value;
+
+        config.providers.openai = config.providers.openai || {};
+        config.providers.openai.api_key = document.getElementById('provider-openai').value;
+
+        config.providers.openrouter = config.providers.openrouter || {};
+        config.providers.openrouter.api_key = document.getElementById('provider-openrouter').value;
+
+        config.providers.moonshot = config.providers.moonshot || {};
+        config.providers.moonshot.api_key = document.getElementById('provider-moonshot').value;
+
+        config.providers.deepseek = config.providers.deepseek || {};
+        config.providers.deepseek.api_key = document.getElementById('provider-deepseek').value;
+
+        config.providers.groq = config.providers.groq || {};
+        config.providers.groq.api_key = document.getElementById('provider-groq').value;
+
+        config.providers.gemini = config.providers.gemini || {};
+        config.providers.gemini.api_key = document.getElementById('provider-gemini').value;
+
+        config.providers.vllm = config.providers.vllm || {};
+        config.providers.vllm.api_base = document.getElementById('provider-vllm').value;
 
         const response = await fetch('/api/config/save', {
             method: 'POST',
@@ -189,9 +398,9 @@ async function saveConfig() {
         }
 
         const result = await response.json();
-        showMessage(result.message || 'Configuration saved successfully! Restart v16 gateway to apply changes.', 'success');
+        showMessage(result.message || 'Configuration saved! Restart v16 gateway to apply changes.', 'success');
 
-        // Reload config to ensure sync
+        // Reload config
         await loadConfig();
         await loadStatus();
     } catch (error) {
@@ -209,6 +418,11 @@ function showMessage(text, type) {
     setTimeout(() => {
         messageEl.style.display = 'none';
     }, 5000);
+}
+
+// Generate unique ID
+function generateId() {
+    return 'agent-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 }
 
 // Load initial data
