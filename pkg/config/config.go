@@ -56,6 +56,7 @@ type Config struct {
 
 type AgentsConfig struct {
 	Defaults AgentDefaults `json:"defaults"`
+	List     []AgentConfig `json:"list"`
 }
 
 type AgentDefaults struct {
@@ -66,6 +67,26 @@ type AgentDefaults struct {
 	MaxTokens           int     `json:"max_tokens" env:"PICOCLAW_AGENTS_DEFAULTS_MAX_TOKENS"`
 	Temperature         float64 `json:"temperature" env:"PICOCLAW_AGENTS_DEFAULTS_TEMPERATURE"`
 	MaxToolIterations   int     `json:"max_tool_iterations" env:"PICOCLAW_AGENTS_DEFAULTS_MAX_TOOL_ITERATIONS"`
+}
+
+type AgentConfig struct {
+	ID                  string          `json:"id"`
+	Name                string          `json:"name"`
+	Personality         string          `json:"personality"`
+	Provider            string          `json:"provider"`
+	Model               string          `json:"model"`
+	MaxTokens           int             `json:"max_tokens"`
+	Temperature         float64         `json:"temperature"`
+	Workspace           string          `json:"workspace"`
+	RestrictToWorkspace bool            `json:"restrict_to_workspace"`
+	Enabled             bool            `json:"enabled"`
+	TelegramChatID      string          `json:"telegram_chat_id"`
+	CronJobs            []AgentCronJob  `json:"cron_jobs"`
+}
+
+type AgentCronJob struct {
+	Schedule string `json:"schedule"`
+	Task     string `json:"task"`
 }
 
 type ChannelsConfig struct {

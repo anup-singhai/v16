@@ -140,6 +140,42 @@ deps:
 run: build
 	@$(BUILD_DIR)/$(BINARY_NAME) $(ARGS)
 
+## whatsapp-setup: Setup WhatsApp bridge (one-time)
+whatsapp-setup:
+	@echo "Setting up WhatsApp bridge..."
+	@mkdir -p ../whatsapp-bridge
+	@cd ../whatsapp-bridge && npm init -y && npm install whatsapp-web.js ws qrcode-terminal
+	@echo 'const { Client, LocalAuth } = require("whatsapp-web.js");' > ../whatsapp-bridge/server.js
+	@echo 'const WebSocket = require("ws");' >> ../whatsapp-bridge/server.js
+	@echo 'const qrcode = require("qrcode-terminal");' >> ../whatsapp-bridge/server.js
+	@echo 'const client = new Client({ authStrategy: new LocalAuth(), puppeteer: { headless: true, args: ["--no-sandbox"] } });' >> ../whatsapp-bridge/server.js
+	@echo 'const wss = new WebSocket.Server({ port: 3001 });' >> ../whatsapp-bridge/server.js
+	@echo 'const clients = new Set();' >> ../whatsapp-bridge/server.js
+	@echo 'client.on("qr", (qr) => { console.log("\\n📱 Scan QR:\\n"); qrcode.generate(qr, { small: true }); });' >> ../whatsapp-bridge/server.js
+	@echo 'client.on("ready", () => console.log("✅ WhatsApp ready"));' >> ../whatsapp-bridge/server.js
+	@echo 'client.on("message", async (msg) => { clients.forEach(ws => { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: "message", from: msg.from, content: msg.body, timestamp: Date.now() })); }); });' >> ../whatsapp-bridge/server.js
+	@echo 'wss.on("connection", (ws) => { clients.add(ws); console.log("✅ v16 connected"); ws.on("message", async (data) => { const msg = JSON.parse(data); if (msg.type === "send") await client.sendMessage(msg.to, msg.content); }); ws.on("close", () => clients.delete(ws)); });' >> ../whatsapp-bridge/server.js
+	@echo 'client.initialize(); console.log("🚀 Bridge: ws://localhost:3001");' >> ../whatsapp-bridge/server.js
+	@echo "✅ WhatsApp bridge ready"
+
+## whatsapp-start: Start WhatsApp + v16 gateway
+whatsapp-start:
+	@if [ ! -f ~/.v16/config.json ]; then echo "⚠️  Run './v16 init' first"; exit 1; fi
+	@mkdir -p ~/.v16/logs
+	@echo "Starting WhatsApp bridge..."
+	@cd ../whatsapp-bridge && nohup node server.js > ~/.v16/logs/whatsapp.log 2>&1 & echo $$! > /tmp/whatsapp-bridge.pid
+	@sleep 3
+	@tail -20 ~/.v16/logs/whatsapp.log
+	@echo ""
+	@echo "Starting v16 gateway..."
+	@$(BUILD_DIR)/$(BINARY_NAME) gateway
+
+## whatsapp-stop: Stop WhatsApp services
+whatsapp-stop:
+	@if [ -f /tmp/whatsapp-bridge.pid ]; then kill $$(cat /tmp/whatsapp-bridge.pid) 2>/dev/null || true; rm /tmp/whatsapp-bridge.pid; fi
+	@pkill -f "v16 gateway" || true
+	@echo "✅ Stopped"
+
 ## help: Show this help message
 help:
 	@echo "v16 Makefile"
@@ -153,8 +189,13 @@ help:
 	@echo "Examples:"
 	@echo "  make build              # Build for current platform"
 	@echo "  make install            # Install to ~/.local/bin"
-	@echo "  make uninstall          # Remove from /usr/local/bin"
-	@echo "  make install-skills     # Install skills to workspace"
+	@echo "  make whatsapp-setup     # Setup WhatsApp (one-time)"
+	@echo "  make whatsapp-start     # Start WhatsApp + gateway"
+	@echo ""
+	@echo "WhatsApp Setup:"
+	@echo "  1. make whatsapp-setup"
+	@echo "  2. ./build/v16 init && add API key to ~/.v16/config.json"
+	@echo "  3. make whatsapp-start"
 	@echo ""
 	@echo "Environment Variables:"
 	@echo "  INSTALL_PREFIX          # Installation prefix (default: ~/.local)"

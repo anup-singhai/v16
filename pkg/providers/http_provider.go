@@ -431,3 +431,74 @@ func CreateProvider(cfg *config.Config) (LLMProvider, error) {
 
 	return NewHTTPProvider(apiKey, apiBase, proxy), nil
 }
+
+// CreateProviderWithOverride creates a provider with explicit provider and model override
+// Used for autonomous agents that may use different providers than the default
+func CreateProviderWithOverride(cfg *config.Config, providerName, model string) (LLMProvider, error) {
+	if providerName == "" {
+		providerName = cfg.Agents.Defaults.Provider
+	}
+	if model == "" {
+		model = cfg.Agents.Defaults.Model
+	}
+
+	providerName = strings.ToLower(providerName)
+	var apiKey, apiBase, proxy string
+
+	switch providerName {
+	case "groq":
+		apiKey = cfg.Providers.Groq.APIKey
+		apiBase = cfg.Providers.Groq.APIBase
+		if apiBase == "" {
+			apiBase = "https://api.groq.com/openai/v1"
+		}
+	case "openai", "gpt":
+		apiKey = cfg.Providers.OpenAI.APIKey
+		apiBase = cfg.Providers.OpenAI.APIBase
+		if apiBase == "" {
+			apiBase = "https://api.openai.com/v1"
+		}
+	case "anthropic", "claude":
+		apiKey = cfg.Providers.Anthropic.APIKey
+		apiBase = cfg.Providers.Anthropic.APIBase
+		if apiBase == "" {
+			apiBase = "https://api.anthropic.com/v1"
+		}
+	case "moonshot":
+		apiKey = cfg.Providers.Moonshot.APIKey
+		apiBase = cfg.Providers.Moonshot.APIBase
+		if apiBase == "" {
+			apiBase = "https://api.moonshot.ai/v1"
+		}
+	case "deepseek":
+		apiKey = cfg.Providers.DeepSeek.APIKey
+		apiBase = cfg.Providers.DeepSeek.APIBase
+		if apiBase == "" {
+			apiBase = "https://api.deepseek.com/v1"
+		}
+	case "gemini":
+		apiKey = cfg.Providers.Gemini.APIKey
+		apiBase = cfg.Providers.Gemini.APIBase
+		if apiBase == "" {
+			apiBase = "https://generativelanguage.googleapis.com/v1"
+		}
+	case "openrouter":
+		apiKey = cfg.Providers.OpenRouter.APIKey
+		apiBase = cfg.Providers.OpenRouter.APIBase
+		if apiBase == "" {
+			apiBase = "https://openrouter.ai/api/v1"
+		}
+	default:
+		return nil, fmt.Errorf("unsupported provider: %s", providerName)
+	}
+
+	if apiKey == "" {
+		return nil, fmt.Errorf("no API key configured for provider: %s", providerName)
+	}
+
+	if apiBase == "" {
+		return nil, fmt.Errorf("no API base configured for provider: %s", providerName)
+	}
+
+	return NewHTTPProvider(apiKey, apiBase, proxy), nil
+}

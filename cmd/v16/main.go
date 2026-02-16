@@ -659,6 +659,18 @@ func gatewayCmd() {
 	}
 	fmt.Println("✓ Heartbeat service started")
 
+	// Setup and start autonomous agents
+	autonomousManager := agent.NewAutonomousAgentManager(cfg, msgBus)
+	if err := autonomousManager.LoadAgents(); err != nil {
+		fmt.Printf("Error loading autonomous agents: %v\n", err)
+	}
+	if autonomousManager.GetAgentCount() > 0 {
+		if err := autonomousManager.StartAgents(); err != nil {
+			fmt.Printf("Error starting autonomous agents: %v\n", err)
+		}
+		fmt.Printf("✓ Autonomous agents started: %d agents\n", autonomousManager.GetAgentCount())
+	}
+
 	stateManager := state.NewManager(cfg.WorkspacePath())
 	deviceService := devices.NewService(devices.Config{
 		Enabled:    cfg.Devices.Enabled,
@@ -686,6 +698,7 @@ func gatewayCmd() {
 	deviceService.Stop()
 	heartbeatService.Stop()
 	cronService.Stop()
+	autonomousManager.StopAgents()
 	agentLoop.Stop()
 	channelManager.StopAll(ctx)
 	fmt.Println("✓ Gateway stopped")
