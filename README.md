@@ -28,6 +28,15 @@
   <p><i>Real conversation with v16 bot: file operations, web search, desktop analysis</i></p>
 </div>
 
+### 🎥 Video Demos
+
+**24/7 Autonomous AWS Log Monitoring**
+Watch how V16 autonomously monitors AWS CloudWatch logs every hour and sends intelligent health reports to Telegram:
+
+[![24/7 AWS Log Monitoring Agent](https://img.youtube.com/vi/7Q7MuoR7iaE/maxresdefault.jpg)](https://www.youtube.com/watch?v=7Q7MuoR7iaE)
+
+**[Watch: Autonomous Agent Demo](https://www.youtube.com/watch?v=7Q7MuoR7iaE)** - See the agent analyze logs, detect errors, and provide actionable insights automatically.
+
 ---
 
 ## 🌟 What is V16 Client?
